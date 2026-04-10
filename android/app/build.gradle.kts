@@ -8,32 +8,38 @@ plugins {
 
 android {
     namespace = "io.goodmidnight.scanner"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
-
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "io.goodmidnight.scanner"
+        buildFeatures.buildConfig = true
         minSdk = 27
-        compileSdk = 36
         targetSdk = 36
         versionCode = 1
         versionName = "0.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        ndk {
+            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86_64"))
+        }
+
         externalNativeBuild {
             cmake {
                 cppFlags("-std=c++17")
-                val openCvPath = File(rootProject.projectDir, "../libs/opencv/android/sdk/native/jni").absolutePath
+                val openCvPath = File(
+                    rootProject.projectDir,
+                    "../libs/opencv/android/sdk/native/jni"
+                ).absolutePath
                 arguments("-DOpenCV_DIR=$openCvPath")
             }
         }
     }
 
-
+    externalNativeBuild {
+        cmake {
+            path = file("../../cpp/android/CMakeLists.txt")
+        }
+    }
 
     buildTypes {
         release {
@@ -58,16 +64,22 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.core.splashscreen)
+
     implementation(libs.hilt.android)
 
     implementation(libs.bundles.androidx.compose)
     implementation(libs.bundles.androidx.hilt)
     implementation(libs.bundles.androidx.lifecycle)
     implementation(libs.bundles.androidx.navigation)
+    implementation(libs.bundles.androidx.camera)
 
     implementation(libs.bundles.coil)
     implementation(libs.bundles.kotlin)
 
     androidTestImplementation(libs.bundles.androidx.test)
     testImplementation(libs.bundles.test)
+
+    implementation(libs.mlkit.text.recognition.korean)
+    implementation(libs.coroutines.play.services)
 }
