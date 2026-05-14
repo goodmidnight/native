@@ -8,11 +8,13 @@ list(APPEND CMAKE_PREFIX_PATH "/opt/homebrew")
 find_package(OpenCV REQUIRED)
 
 set(CORE_SOURCES
-        ../core/scanner_engine.cpp
-        ../core/src/image_preprocessor.cpp
-        ../core/src/geometry_utils.cpp
-        ../core/src/image_utils.cpp
-        ../core/src/image_postprocessor.cpp
+        ../core/ScannerEngine.cpp
+        ../core/src/GeometryUtils.cpp
+        ../core/src/ImagePreprocessor.cpp
+        ../core/src/ImageUtils.cpp
+        ../core/src/ImageValidator.cpp
+        ../core/src/OcrProcessor.cpp
+        ../core/src/ScanProcessor.cpp
 )
 
 add_executable(NativeScannerDesktop
