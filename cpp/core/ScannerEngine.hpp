@@ -1,7 +1,9 @@
+#include <memory>
+#include "IPostprocessor.hpp"
 #ifndef SCANNER_ENGINE_HPP
 #define SCANNER_ENGINE_HPP
 
-#include "scanner_type.h"
+#include "ScannerType.h"
 #include <opencv2/opencv.hpp>
 #include <vector>
 #include <mutex>
@@ -65,6 +67,10 @@ namespace native_scanner {
         std::vector<cv::Point2f> prev_points_; // Cached coordinates from the previous frame for EMA smoothing
         std::mutex config_mutex_;              // Ensures thread-safe access to config_
         int stable_frame_count_ = 0;           // Tracks how many consecutive frames the document has been steady
+
+        // Strategy pattern for post-processing
+        std::unique_ptr<IPostprocessor> scan_processor_;
+        std::unique_ptr<IPostprocessor> ocr_processor_;
     };
 }
 

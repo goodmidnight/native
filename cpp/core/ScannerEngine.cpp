@@ -1,11 +1,16 @@
-#include "scanner_engine.hpp"
-#include "geometry_utils.h"
-#include "image_postprocessor.h"
-#include "image_utils.h"
-#include "image_preprocessor.h"
+#include "ScannerEngine.hpp"
+#include "GeometryUtils.h"
+#include "ImageUtils.h"
+#include "ImagePreprocessor.h"
+#include "ImageValidator.hpp"
+#include "ScanProcessor.hpp"
+#include "OcrProcessor.hpp"
 
 namespace native_scanner {
-    ScannerEngine::ScannerEngine(const ScannerConfig &config) : config_(config) {}
+    ScannerEngine::ScannerEngine(const ScannerConfig &config) : config_(config) {
+        scan_processor_ = std::make_unique<ScanProcessor>();
+        ocr_processor_ = std::make_unique<OcrProcessor>();
+    }
 
     void ScannerEngine::updateConfig(const ScannerConfig &config) {
         std::lock_guard<std::mutex> lock(config_mutex_);
@@ -138,55 +143,32 @@ namespace native_scanner {
             if (warped.rows > warped.cols) cv::rotate(warped, warped, cv::ROTATE_90_CLOCKWISE); // Force Landscape
         }
 
-        // Step 5: Quality Validation (Blur and Glare)
+
         cv::Mat gray_warped;
         cv::cvtColor(warped, gray_warped, cv::COLOR_BGR2GRAY);
 
-        // 5-A: Check for Blurriness using Laplacian Variance
-        // Calculates the sharpness of edges. If variance is below the threshold, it's considered blurry.
-        cv::Mat laplacian, mean, stddev;
-        cv::Laplacian(gray_warped, laplacian, CV_64F);
-        cv::meanStdDev(laplacian, mean, stddev);
-        double variance = stddev.at<double>(0) * stddev.at<double>(0);
+        // Step 5: Quality Assurance using ImageValidator
+        // The blur threshold is lowered significantly to account for white margins in documents.
+        result.is_blurry = ImageValidator::isBlurry(gray_warped, 20.0);
 
-        if (variance < current_config.blur_threshold) {
-            result.is_blurry = true;
-            result.status = CaptureStatus::ERR_BLURRY;
-        }
+        double glare_threshold = (type == DocumentType::ID_CARD)
+                                 ? current_config.glare_threshold_id
+                                 : current_config.glare_threshold_general;
+        result.has_glare = ImageValidator::hasGlare(gray_warped, glare_threshold);
 
-        // 5-B: Check for Glare using a white-out pixel ratio
-        // Counts pixels that are almost pure white (>= 245) to detect severe reflections.
-        cv::Mat glare_mask;
-        cv::threshold(gray_warped, glare_mask, 245, 255, cv::THRESH_BINARY);
-        int glare_pixels = cv::countNonZero(glare_mask);
-        double glare_ratio = static_cast<double>(glare_pixels) / (gray_warped.rows * gray_warped.cols);
-
-        // ID Cards are usually plastic and highly reflective, so they require a stricter glare threshold.
-        double glare_threshold = (type == DocumentType::ID_CARD) ? current_config.glare_threshold_id : current_config.glare_threshold_general;
-
-        if (glare_ratio > glare_threshold) {
-            result.has_glare = true;
-            result.status = CaptureStatus::ERR_GLARE;
-        }
-
-        // Abort processing and return the raw warped image if quality is substandard,
-        // allowing the client UI to show the user why the capture failed.
-        if (result.status != CaptureStatus::SUCCESS) {
-            result.message = "Low Quality. Please retake.";
-            result.image = warped;
-            return result;
-        }
-
+        // Set status to SUCCESS to ensure the processed image is always returned,
+        // allowing the client UI to decide how to handle the blur/glare flags.
+        result.status = CaptureStatus::SUCCESS;
         result.message = "SUCCESS";
 
         // Step 6: Domain-Specific Post-Processing
         // Delegates the visual enhancement to the post-processor based on the requested mode.
         switch (mode) {
             case ProcessingMode::SCAN:
-                result.image = ImagePostprocessor::processForScan(warped, type);
+                result.image = scan_processor_->process(warped, type);
                 break;
             case ProcessingMode::OCR:
-                result.image = ImagePostprocessor::processForOCR(warped, type);
+                result.image = ocr_processor_->process(warped, type);
                 break;
             default:
                 result.image = warped;
