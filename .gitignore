@@ -24,3 +24,4 @@ build/
 dist/
 coverage/
 libs
+specs/
