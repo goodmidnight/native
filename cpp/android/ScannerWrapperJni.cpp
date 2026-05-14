@@ -5,17 +5,22 @@
 
 #include <jni.h>
 #include <android/bitmap.h>
+#include <android/log.h>
 #include <string>
 #include <vector>
+#include <functional>
 #include "scanner_engine.hpp"
 
 using namespace native_scanner;
 
 #define JNI_METHOD(METHOD_NAME) Java_io_goodmidnight_scanner_data_jni_NativeScanner_##METHOD_NAME
+#define LOG_TAG "NativeScanner"
 
 // ============================================================================
-// 전역 캐시 (Global Reference Cache) - 리플렉션 오버헤드 제거
+// 전역 참조 및 변수 (Global Reference Cache) - 리플렉션 오버헤드 제거
 // ============================================================================
+JavaVM* g_vm = nullptr;
+
 jclass g_DocumentFrameClass = nullptr;
 jmethodID g_DocumentFrameConstructor = nullptr;
 jfieldID g_FrameIsDetectedField = nullptr;
@@ -32,6 +37,7 @@ jobject g_BitmapConfigArgb8888 = nullptr;
 // JNI 생명주기 관리
 // ============================================================================
 extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
+    g_vm = vm;
     JNIEnv* env;
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
         return JNI_ERR;
@@ -45,9 +51,9 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
     // 1. DocumentFrame 캐싱 및 방어 로직
     jclass localFrameCls = env->FindClass(frameClassName);
     if (!localFrameCls) {
-        env->ExceptionDescribe(); // Logcat에 에러 상세 출력
-        env->ExceptionClear();    // 펜딩된 에러를 지워 강제 종료(SIGABRT) 방지
-        return JNI_ERR;           // 라이브러리 로드 중단
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+        return JNI_ERR;
     }
     g_DocumentFrameClass = reinterpret_cast<jclass>(env->NewGlobalRef(localFrameCls));
     g_DocumentFrameConstructor = env->GetMethodID(g_DocumentFrameClass, "<init>", "([FZFZ)V");
@@ -173,8 +179,46 @@ JNI_METHOD(nativeUpdateConfig)(JNIEnv* env, jobject thiz, jlong ptr, jobject jco
 extern "C" JNIEXPORT void JNICALL
 JNI_METHOD(nativeRelease)(JNIEnv* env, jobject thiz, jlong ptr) {
     auto* engine = reinterpret_cast<ScannerEngine*>(ptr);
+    if (engine) {
+        engine->setLogger(nullptr);
     delete engine;
 }
+}
+
+/**
+ * @brief C++ 엔진에 안드로이드 로거를 콜백으로 등록합니다.
+ */
+extern "C" JNIEXPORT void JNICALL
+JNI_METHOD(nativeSetLogger)(JNIEnv* env, jobject thiz, jlong ptr) {
+    auto* engine = reinterpret_cast<ScannerEngine*>(ptr);
+    if (!engine) return;
+
+    auto android_logger = [](LogLevel level, const std::string& msg) {
+        JNIEnv* jni_env;
+        int get_env_stat = g_vm->GetEnv(reinterpret_cast<void**>(&jni_env), JNI_VERSION_1_6);
+        if (get_env_stat == JNI_EDETACHED) {
+            if (g_vm->AttachCurrentThread(&jni_env, nullptr) != 0) {
+                return;
+            }
+        }
+
+        android_LogPriority android_level = ANDROID_LOG_DEFAULT;
+        switch (level) {
+            case LogLevel::DEBUG: android_level = ANDROID_LOG_DEBUG; break;
+            case LogLevel::INFO:  android_level = ANDROID_LOG_INFO;  break;
+            case LogLevel::WARN:  android_level = ANDROID_LOG_WARN;  break;
+            case LogLevel::ERROR: android_level = ANDROID_LOG_ERROR; break;
+        }
+
+        __android_log_print(android_level, LOG_TAG, "%s", msg.c_str());
+
+        if (get_env_stat == JNI_EDETACHED) {
+            g_vm->DetachCurrentThread();
+        }
+        };
+
+    engine->setLogger(android_logger);
+    }
 
 extern "C" JNIEXPORT jobject JNICALL
 JNI_METHOD(nativeDetect)(JNIEnv* env, jobject thiz, jlong ptr, jobject bitmap, jint type, jint rotation) {
@@ -187,14 +231,13 @@ JNI_METHOD(nativeDetect)(JNIEnv* env, jobject thiz, jlong ptr, jobject bitmap, j
     jfloatArray jpoints = env->NewFloatArray(8);
     if (frame.is_detected && frame.points.size() == 4) {
         float pts[8] = {
-                frame.points[0].x, frame.points[0].y,
+                frame.points[0.x, frame.points[0].y,
                 frame.points[1].x, frame.points[1].y,
                 frame.points[2].x, frame.points[2].y,
                 frame.points[3].x, frame.points[3].y
         };
         env->SetFloatArrayRegion(jpoints, 0, 8, pts);
     }
-
     return env->NewObject(
             g_DocumentFrameClass,
             g_DocumentFrameConstructor,
@@ -210,11 +253,9 @@ JNI_METHOD(nativeCapture)(JNIEnv* env, jobject thiz, jlong ptr, jobject bitmap, 
     auto* engine = reinterpret_cast<ScannerEngine*>(ptr);
     if (!engine) return nullptr;
 
-    // 캐시된 Field ID를 사용하여 O(1) 탐색
     jboolean is_detected = env->GetBooleanField(jframe, g_FrameIsDetectedField);
     jobject jpoints_obj = env->GetObjectField(jframe, g_FramePointsField);
 
-    // 올바른 캐스팅 방식 적용 (reinterpret_cast 제거)
     jfloatArray jpoints_array = static_cast<jfloatArray>(jpoints_obj);
     jfloat* points_ptr = env->GetFloatArrayElements(jpoints_array, nullptr);
 
