@@ -37,7 +37,14 @@ namespace native_scanner {
         /**
          * @brief Executes the full preprocessing pipeline (Grayscale -> Blur -> Canny).
          */
-        static void preprocess(const cv::Mat& src, cv::Mat& dst, float canny_sigma = 0.33f, int custom_blur_size = 0);
+        static void preprocess(const cv::Mat& src, cv::Mat& dst, float canny_sigma = 0.33f, int custom_blur_size = 0, bool low_light_mode = false);
+
+        /**
+         * @brief Removes shadows from an image by normalizing brightness.
+         * @param src Grayscale input image, typically from a warped document.
+         * @param dst Grayscale image with shadows suppressed.
+         */
+        static void removeShadows(const cv::Mat& src, cv::Mat& dst);
     };
 }
 

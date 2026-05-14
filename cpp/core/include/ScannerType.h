@@ -4,6 +4,7 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 #include <string>
+#include <functional>
 
 namespace native_scanner {
 
@@ -36,8 +37,27 @@ namespace native_scanner {
         ERR_NOT_DETECTED = 1,
         ERR_BLURRY = 2,
         ERR_GLARE = 3,
-        ERR_UNKNOWN = 4
+        ERR_WARP_FAILED = 4,
+        ERR_EMPTY_IMAGE = 5,
+        ERR_UNKNOWN = 6
     };
+
+    /**
+     * @enum LogLevel
+     * @brief Log severity levels, mapped to Android's Log constants for convenience.
+     */
+    enum class LogLevel {
+        DEBUG = 3, // Log.DEBUG
+        INFO = 4,  // Log.INFO
+        WARN = 5,  // Log.WARN
+        ERROR = 6  // Log.ERROR
+    };
+
+    /**
+     * @typedef LoggerCallback
+     * @brief A function pointer type for the logging callback mechanism.
+     */
+    using LoggerCallback = std::function<void(LogLevel, const std::string&)>;
 
     /**
      * @struct ScannerConfig
