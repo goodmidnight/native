@@ -71,10 +71,17 @@ namespace native_scanner {
         cv::Canny(src, dst, low_thresh, high_thresh);
     }
 
-    void ImagePreprocessor::preprocess(const cv::Mat &src, cv::Mat &dst, float canny_sigma, int custom_blur_size) {
+    void ImagePreprocessor::preprocess(const cv::Mat &src, cv::Mat &dst, float canny_sigma, int custom_blur_size, bool low_light_mode) {
         cv::Mat gray;
         if (src.channels() == 3 || src.channels() == 4) {
-            cv::cvtColor(src, gray, cv::COLOR_BGR2GRAY);
+            // 저대비 환경인지 판단하여 CLAHE를 동적으로 적용합니다.
+            if (low_light_mode) {
+                cv::Mat enhanced;
+                applyLowLightEnhancement(src, enhanced);
+                cv::cvtColor(enhanced, gray, cv::COLOR_BGR2GRAY);
+            } else {
+                cv::cvtColor(src, gray, cv::COLOR_BGR2GRAY);
+            }
         } else {
             gray = src.clone();
         }
@@ -109,5 +116,29 @@ namespace native_scanner {
         // 노이즈나 빛 반사로 인해 점선처럼 끊어진 테두리를 하나의 실선 덩어리로 묶어줍니다.
         cv::Mat morph_kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
         cv::morphologyEx(dst, dst, cv::MORPH_CLOSE, morph_kernel);
+    }
+
+    void ImagePreprocessor::removeShadows(const cv::Mat &src, cv::Mat &dst) {
+        if (src.channels() != 1) {
+            // 그림자 제거는 그레이스케일 이미지에 적용해야 최적의 결과를 얻습니다.
+            cv::cvtColor(src, dst, cv::COLOR_BGR2GRAY);
+        } else {
+            dst = src.clone();
+        }
+
+        // 1. 이미지의 전반적인 조명 패턴(배경)을 추정합니다.
+        // medianBlur를 큰 커널 사이즈로 적용하여 텍스트 같은 작은 디테일을 모두 제거하고,
+        // 그림자로 인해 어두워진 넓은 영역만 남깁니다.
+        cv::Mat background;
+        int kernel_size = static_cast<int>(dst.cols / 8) | 1; // 이미지 너비에 비례하는 동적 커널 사이즈
+        cv::medianBlur(dst, background, kernel_size);
+
+        // 2. 원본 이미지와 배경 이미지의 차이를 계산하여 조명을 균일하게 만듭니다.
+        // cv::absdiff 대신 255를 더한 후 나누는 방식을 사용하여 더욱 자연스러운 결과를 얻습니다.
+        // (이 방식은 조명 불균일성 보정에 널리 사용됩니다)
+        cv::Mat result = 255 - (background - dst);
+
+        // 3. 처리된 이미지가 너무 어두워지는 것을 방지하기 위해 밝기를 정규화합니다.
+        cv::normalize(result, dst, 0, 255, cv::NORM_MINMAX);
     }
 }

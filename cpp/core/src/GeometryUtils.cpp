@@ -11,51 +11,86 @@ namespace native_scanner {
         return scaled;
     }
 
+    struct ContourCandidate {
+        std::vector<cv::Point> contour;
+        double area;
+        double score;
+
+        ContourCandidate(std::vector<cv::Point> c, double a) : contour(std::move(c)), area(a), score(0.0) {}
+
+        // 점수 계산을 위한 연산자 오버로딩
+        bool operator>(const ContourCandidate& other) const {
+            return score > other.score;
+        }
+    };
+
     DocumentFrame GeometryUtils::findLargestArea(const cv::Mat &edged, double min_area_ratio) {
         DocumentFrame result;
         std::vector<std::vector<cv::Point>> contours;
-
-        // Find external contours only to optimize speed. Inner text edges are ignored.
         cv::findContours(edged, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-        double max_area = 0;
-        std::vector<cv::Point> best_approx;
+        if (contours.empty()) {
+            return result;
+        }
+
         const double total_area = edged.cols * edged.rows;
+        std::vector<ContourCandidate> candidates;
 
         for (const auto &contour: contours) {
             double area = cv::contourArea(contour);
-
-            // Filtering: Ignore contours smaller than the minimum area threshold
-            if (area < (total_area * min_area_ratio)) continue;
-
-            std::vector<cv::Point> approx;
-            double peri = cv::arcLength(contour, true);
-
-            // Douglas-Peucker algorithm: Approximate the contour to a simpler polygon
-            // 2% of the perimeter is a standard empirical value for document detection
-            cv::approxPolyDP(contour, approx, 0.02 * peri, true);
-
-            // A valid document MUST have exactly 4 corners and be a convex shape (no inward dents)
-            if (approx.size() == 4 && cv::isContourConvex(approx)) {
-                if (area > max_area && isValidShape(approx)) {
-                    max_area = area;
-                    best_approx = approx;
-                }
+            if (area < (total_area * min_area_ratio)) {
+                continue;
             }
+            candidates.emplace_back(contour, area);
         }
 
-        if (!best_approx.empty()) {
+        if (candidates.empty()) {
+            return result;
+        }
+
+        // 지능형 윤곽선 필터링: 후보군 점수화
+        for (auto& candidate : candidates) {
+            double peri = cv::arcLength(candidate.contour, true);
+            std::vector<cv::Point> approx;
+            cv::approxPolyDP(candidate.contour, approx, 0.02 * peri, true);
+
+            // 1. 사각형에 가까운 정도 (4개의 꼭짓점)
+            double square_score = (approx.size() == 4) ? 1.0 : 0.0;
+
+            // 2. 볼록성 점수
+            double convexity_score = 0.0;
+            if (square_score > 0) {
+                 convexity_score = cv::isContourConvex(approx) ? 1.0 : 0.0;
+            }
+
+            // 3. 면적 점수 (클수록 좋음, 정규화)
+            double area_score = candidate.area / total_area;
+
+            // 최종 점수: 각 요소에 가중치를 부여하여 합산
+            candidate.score = (square_score * 0.4) + (convexity_score * 0.4) + (area_score * 0.2);
+        }
+
+        // 가장 높은 점수를 받은 후보를 선택
+        std::sort(candidates.begin(), candidates.end(), std::greater<ContourCandidate>());
+        ContourCandidate best_candidate = candidates[0];
+
+        std::vector<cv::Point> best_approx;
+        double peri = cv::arcLength(best_candidate.contour, true);
+        cv::approxPolyDP(best_candidate.contour, best_approx, 0.02 * peri, true);
+
+
+        if (best_candidate.score > 0.5 && best_approx.size() == 4) { // 일정 점수 이상이고, 유효한 사각형일 때만
             result.is_detected = true;
             std::vector<cv::Point2f> temp_points;
             for (const auto &p: best_approx) temp_points.emplace_back(p.x, p.y);
 
-            // Ensure points are always ordered (TL, TR, BR, BL) before returning
             result.points = orderPoints(temp_points);
-            result.confidence = static_cast<float>(max_area / total_area);
+            result.confidence = static_cast<float>(best_candidate.area / total_area);
         }
 
         return result;
     }
+
 
     std::vector<cv::Point2f> GeometryUtils::smoothPoints(
         const std::vector<cv::Point2f> &prev,

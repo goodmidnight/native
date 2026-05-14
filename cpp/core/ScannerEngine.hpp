@@ -31,6 +31,12 @@ namespace native_scanner {
         void updateConfig(const ScannerConfig &config);
 
         /**
+         * @brief Registers a callback function for logging.
+         * @param logger The function to be called for logging messages.
+         */
+        void setLogger(LoggerCallback logger);
+
+        /**
          * @brief [Preview Phase] Detects the geometric boundary of a document in real-time.
          * @param preview_img The input image matrix from the camera preview.
          * @param type The type of document being scanned, used to adjust minimum area thresholds.
@@ -63,6 +69,7 @@ namespace native_scanner {
         );
 
     private:
+        LoggerCallback logger_ = nullptr;      // Callback for propagating logs to the client
         ScannerConfig config_;                 // Current active configuration
         std::vector<cv::Point2f> prev_points_; // Cached coordinates from the previous frame for EMA smoothing
         std::mutex config_mutex_;              // Ensures thread-safe access to config_
