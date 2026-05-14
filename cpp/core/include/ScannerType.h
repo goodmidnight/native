@@ -46,12 +46,12 @@ namespace native_scanner {
     struct ScannerConfig {
         int target_width = 800;             /*!< Downscale width for real-time preview processing */
         float canny_sigma = 0.33f;          /*!< Sensitivity multiplier for automatic Canny edge detection */
-        double min_area_ratio = 0.2;        /*!< Minimum area ratio (0.0~1.0) a document must occupy */
+        double min_area_ratio = 0.15;        /*!< Minimum area ratio (0.0~1.0) a document must occupy */
         bool low_light_mode = false;        /*!< Applies CLAHE to boost contrast in dark environments */
 
-        double blur_threshold = 100.0;         /*!< Variance threshold for Laplacian blur detection */
-        double glare_threshold_general = 0.03; /*!< Allowed overexposed white pixel ratio for general docs */
-        double glare_threshold_id = 0.01;      /*!< Stricter glare ratio for reflective ID cards */
+        double blur_threshold = 50.0;         /*!< Variance threshold for Laplacian blur detection */
+        double glare_threshold_general = 0.08; /*!< Allowed overexposed white pixel ratio for general docs */
+        double glare_threshold_id = 0.05;      /*!< Stricter glare ratio for reflective ID cards */
         int blur_kernel_size = 0;              /*!< Custom blur kernel size (0 = auto calculated) */
     };
 

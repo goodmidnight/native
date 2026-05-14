@@ -1,7 +1,7 @@
 #ifndef GEOMETRY_LOGIC_H
 #define GEOMETRY_LOGIC_H
 
-#include "scanner_type.h"
+#include "ScannerType.h"
 #include <opencv2/opencv.hpp>
 
 namespace native_scanner {
