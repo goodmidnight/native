@@ -1,4 +1,4 @@
-#include "image_utils.h"
+#include "ImageUtils.h"
 
 namespace native_scanner {
 

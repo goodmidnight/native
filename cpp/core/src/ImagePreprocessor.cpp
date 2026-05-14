@@ -1,6 +1,7 @@
-#include "image_preprocessor.h"
+#include "ImagePreprocessor.h"
 #include <opencv2/imgproc.hpp>
 #include <numeric>
+#include <algorithm>
 
 namespace native_scanner {
 
@@ -71,10 +72,42 @@ namespace native_scanner {
     }
 
     void ImagePreprocessor::preprocess(const cv::Mat &src, cv::Mat &dst, float canny_sigma, int custom_blur_size) {
-        cv::Mat gray, blurred;
-        cv::cvtColor(src, gray, cv::COLOR_BGR2GRAY);
+        cv::Mat gray;
+        if (src.channels() == 3 || src.channels() == 4) {
+            cv::cvtColor(src, gray, cv::COLOR_BGR2GRAY);
+        } else {
+            gray = src.clone();
+        }
 
-        applyDynamicBlur(gray, blurred, custom_blur_size);
+        // 1. 샤프닝(Sharpening) 커널 적용
+        // 중심 픽셀 가중치를 높여 흐릿한 테두리의 명암 대비를 강제로 증폭시킵니다.
+        cv::Mat sharpening_kernel = (cv::Mat_<float>(3, 3) <<
+            0, -1, 0,
+           -1,  5, -1,
+            0, -1, 0);
+        cv::filter2D(gray, gray, gray.depth(), sharpening_kernel);
+
+        // 2. 동적 블러(Blur) 생략 로직 (라플라시안 분산 활용)
+        cv::Mat laplacian, mean, stddev;
+        cv::Laplacian(gray, laplacian, CV_64F);
+        cv::meanStdDev(laplacian, mean, stddev);
+        double variance = stddev.at<double>(0) * stddev.at<double>(0);
+
+        cv::Mat blurred;
+        if (variance > 150.0) {
+            // 충분히 선명할 때만 노이즈 제거용 블러 적용
+            applyDynamicBlur(gray, blurred, custom_blur_size);
+        } else {
+            // 흐릿한 경우 블러 연산을 건너뛰어 추가 픽셀 손실 방지
+            blurred = gray;
+        }
+
+        // 3. 고도화된 Adaptive Canny 알고리즘 적용
         applyAdaptiveCanny(blurred, dst, canny_sigma);
+
+        // 4. 모폴로지 닫기(Close) 연산
+        // 노이즈나 빛 반사로 인해 점선처럼 끊어진 테두리를 하나의 실선 덩어리로 묶어줍니다.
+        cv::Mat morph_kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+        cv::morphologyEx(dst, dst, cv::MORPH_CLOSE, morph_kernel);
     }
 }
