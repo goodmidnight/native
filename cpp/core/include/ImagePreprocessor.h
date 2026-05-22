@@ -2,6 +2,7 @@
 #define IMAGE_FILTER_H
 
 #include <opencv2/opencv.hpp>
+#include "ScannerType.h"
 
 namespace native_scanner {
 
@@ -37,7 +38,7 @@ namespace native_scanner {
         /**
          * @brief Executes the full preprocessing pipeline (Grayscale -> Blur -> Canny).
          */
-        static void preprocess(const cv::Mat& src, cv::Mat& dst, float canny_sigma = 0.33f, int custom_blur_size = 0, bool low_light_mode = false);
+        static void preprocess(const cv::Mat& src, cv::Mat& dst, float canny_sigma = 0.33f, int custom_blur_size = 0, bool low_light_mode = false, DocumentType type = DocumentType::GENERAL);
 
         /**
          * @brief Removes shadows from an image by normalizing brightness.

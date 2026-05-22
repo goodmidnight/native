@@ -25,9 +25,10 @@ namespace native_scanner {
          * @brief Finds the largest valid quadrilateral area representing a document in an edge-detected image.
          * @param edged The preprocessed, binary edge image (e.g., output from Canny).
          * @param min_area_ratio The minimum area the document must occupy relative to the total image size (e.g., 0.2 for 20%).
+         * @param type The document format type to calculate customized aspect-ratio scores.
          * @return DocumentFrame containing the detected points, confidence score, and detection status.
          */
-        static DocumentFrame findLargestArea(const cv::Mat &edged, double min_area_ratio);
+        static DocumentFrame findLargestArea(const cv::Mat &edged, double min_area_ratio, DocumentType type = DocumentType::GENERAL);
 
         /**
          * @brief Applies Exponential Moving Average (EMA) to smooth points across consecutive frames.
