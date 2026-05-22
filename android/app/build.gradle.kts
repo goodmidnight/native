@@ -1,85 +1,30 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
+    alias(libs.plugins.scanner.android.application)
+    alias(libs.plugins.scanner.android.application.compose)
+    alias(libs.plugins.scanner.android.compose.ext)
+    alias(libs.plugins.scanner.android.camera)
+    alias(libs.plugins.scanner.android.datastore)
+    alias(libs.plugins.scanner.android.feature)
+    alias(libs.plugins.scanner.android.google)
+    alias(libs.plugins.scanner.android.hilt)
+    alias(libs.plugins.scanner.android.image)
+    alias(libs.plugins.scanner.android.kotlin)
+    alias(libs.plugins.scanner.android.ml)
+    alias(libs.plugins.scanner.android.room)
+    alias(libs.plugins.scanner.android.test)
 }
 
 android {
     namespace = "io.goodmidnight.scanner"
-    compileSdk = 36
-
-    defaultConfig {
-        applicationId = "io.goodmidnight.scanner"
-        buildFeatures.buildConfig = true
-        minSdk = 27
-        targetSdk = 36
-        versionCode = 1
-        versionName = "0.0.1"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        ndk {
-            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86_64"))
-        }
-
-        externalNativeBuild {
-            cmake {
-                cppFlags("-std=c++17")
-                val openCvPath = File(
-                    rootProject.projectDir,
-                    "../libs/opencv/android/sdk/native/jni"
-                ).absolutePath
-                arguments("-DOpenCV_DIR=$openCvPath")
-            }
-        }
-    }
-
-    externalNativeBuild {
-        cmake {
-            path = file("../../cpp/android/CMakeLists.txt")
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
 }
 
 dependencies {
-    implementation(platform(libs.androidx.compose.bom))
-    add("ksp", libs.hilt.compiler)
-
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.core.splashscreen)
-
-    implementation(libs.hilt.android)
-
-    implementation(libs.bundles.androidx.compose)
-    implementation(libs.bundles.androidx.hilt)
-    implementation(libs.bundles.androidx.lifecycle)
-    implementation(libs.bundles.androidx.navigation)
-    implementation(libs.bundles.androidx.camera)
-
-    implementation(libs.bundles.coil)
-    implementation(libs.bundles.kotlin)
-
-    androidTestImplementation(libs.bundles.androidx.test)
-    testImplementation(libs.bundles.test)
-
-    implementation(libs.mlkit.text.recognition.korean)
-    implementation(libs.coroutines.play.services)
+    implementation(project(":core:data"))
+    implementation(project(":core:datastore"))
+    implementation(project(":core:designsystem"))
+    implementation(project(":core:domain"))
+    implementation(project(":core:model"))
+    implementation(project(":core:ml"))
+    implementation(project(":core:jni"))
 }
+
