@@ -12,6 +12,8 @@ sealed interface CameraEvent : BaseEvent {
     data object OnTakePicture : CameraEvent
     data object OnShutdownCamera : CameraEvent
     data class OnZoomRatioChanged(val zoomRatio: Float) : CameraEvent
+    data object OnToggleTorch : CameraEvent
+    data object OnToggleGridLines : CameraEvent
     data object OnBack : CameraEvent
     data object OnNavigateToResult : CameraEvent
 }

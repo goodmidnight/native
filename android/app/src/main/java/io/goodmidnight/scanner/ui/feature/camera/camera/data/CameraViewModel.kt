@@ -1,37 +1,64 @@
 package io.goodmidnight.scanner.ui.feature.camera.camera.data
 
-import android.util.Log
-import androidx.camera.core.Camera
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.lifecycle.viewModelScope
-import com.google.common.util.concurrent.ListenableFuture
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.goodmidnight.scanner.core.camera.CameraController
+import io.goodmidnight.scanner.core.camera.CameraEffect as CoreCameraEffect
 import io.goodmidnight.scanner.ui.core.exception.AppError
 import io.goodmidnight.scanner.ui.core.viewmodel.BaseViewModel
-import kotlinx.coroutines.guava.await
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CameraViewModel @Inject constructor(
+    private val cameraController: CameraController
 ) : BaseViewModel<CameraState, CameraEvent, CameraEffect, AppError>(
     CameraState()
 ) {
 
-    private var camera: Camera? = null
-    private var cameraProvider: ProcessCameraProvider? = null
-    private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
-
     init {
+        viewModelScope.launch {
+            cameraController.cameraState.collect { ctrlState ->
+                updateState {
+                    copy(
+                        zoomRatio = ctrlState.zoomRatio,
+                        zoomRatioRange = ctrlState.zoomRatioRange,
+                        isTorchEnabled = ctrlState.isTorchEnabled
+                    )
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            cameraController.cameraSideEffect.collect { sideEffect ->
+                if (sideEffect is CoreCameraEffect.SendCapturedImage) {
+                    emitEffect(CameraEffect.TriggerShutterFeedback)
+                }
+            }
+        }
+
         bindEvent { event ->
             when (event) {
-                is CameraEvent.OnInitCamera -> initCamera(event)
-                is CameraEvent.OnTakePicture -> takePicture()
-                is CameraEvent.OnShutdownCamera -> shutdownCamera()
-                is CameraEvent.OnZoomRatioChanged -> setZoomRatio(event.zoomRatio)
+                is CameraEvent.OnInitCamera -> {
+                    // Handled by SharedViewModel to coordinate global scan state
+                }
+                is CameraEvent.OnTakePicture -> {
+                    // Handled by SharedViewModel
+                }
+                is CameraEvent.OnShutdownCamera -> {
+                    // Handled by SharedViewModel
+                }
+                is CameraEvent.OnZoomRatioChanged -> {
+                    cameraController.setZoomRatio(event.zoomRatio)
+                }
+                is CameraEvent.OnToggleTorch -> {
+                    cameraController.setTorchEnabled(!state.value.isTorchEnabled)
+                }
+                is CameraEvent.OnToggleGridLines -> {
+                    updateState {
+                        copy(showGridLines = !showGridLines)
+                    }
+                }
                 CameraEvent.OnBack -> back()
                 CameraEvent.OnNavigateToResult -> navigateToResult()
             }
@@ -40,57 +67,6 @@ class CameraViewModel @Inject constructor(
             error.handleError()
             error.uiMessage?.let { emitEffect(CameraEffect.ShowSnackBar(it)) }
         }
-    }
-
-    private fun initCamera(event: CameraEvent.OnInitCamera) {
-        viewModelScope.launch {
-            cameraProviderFuture = ProcessCameraProvider.getInstance(event.previewView.context)
-            cameraProvider = cameraProviderFuture.await()
-
-            val preview = Preview.Builder().build().also {
-                it.surfaceProvider = event.previewView.surfaceProvider
-            }
-
-            val imageCapture = ImageCapture.Builder().build()
-
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-            try {
-                cameraProvider?.unbindAll()
-                camera = cameraProvider?.bindToLifecycle(
-                    event.lifecycleOwner,
-                    cameraSelector,
-                    preview,
-                    imageCapture
-                )
-
-                camera?.cameraInfo?.zoomState?.observe(event.lifecycleOwner) { zoomState ->
-                    val minRatio = zoomState.minZoomRatio
-                    val maxRatio = zoomState.maxZoomRatio
-                    val currentRatio = zoomState.zoomRatio
-                    updateState {
-                        copy(
-                            zoomRatio = currentRatio,
-                            zoomRatioRange = minRatio..maxRatio
-                        )
-                    }
-                }
-            } catch (e: Exception) {
-                Log.w("CameraViewModel", "Use case binding failed", e)
-            }
-        }
-    }
-
-    private fun setZoomRatio(zoomRatio: Float) {
-        camera?.cameraControl?.setZoomRatio(zoomRatio)
-    }
-
-    private fun takePicture() {
-        // ... take picture logic
-    }
-
-    private fun shutdownCamera() {
-        cameraProvider?.unbindAll()
     }
 
     private fun back() {
@@ -104,9 +80,5 @@ class CameraViewModel @Inject constructor(
             emitEffect(CameraEffect.NativeToResult)
         }
     }
-
-    override fun onCleared() {
-        super.onCleared()
-        shutdownCamera()
-    }
 }
+

@@ -10,6 +10,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import io.goodmidnight.scanner.ui.core.utils.LocalSnackbarHostState
 import io.goodmidnight.scanner.ui.core.utils.showSnackbarImmediately
 import io.goodmidnight.scanner.ui.feature.camera.camera.data.CameraEffect
@@ -38,6 +40,8 @@ fun CameraRoute(
     val snackbarHostState: SnackbarHostState = LocalSnackbarHostState.current
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
 
+    var shutterTriggerTime by remember { mutableStateOf(0L) }
+
     LaunchedEffect(sharedState.currentStep) {
         if (sharedState.currentStep == SharedState.ScannerStep.CAPTURING) {
             haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
@@ -54,6 +58,10 @@ fun CameraRoute(
 
                 CameraEffect.PopBackStack -> popBackStack()
                 CameraEffect.NativeToResult -> navigateToResult()
+                CameraEffect.TriggerShutterFeedback -> {
+                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                    shutterTriggerTime = System.currentTimeMillis()
+                }
             }
         }
     }
@@ -81,6 +89,7 @@ fun CameraRoute(
         modifier = modifier,
         state = state,
         sharedState = sharedState,
+        shutterTriggerTime = shutterTriggerTime,
         onBack = remember { { viewModel.onEvent(CameraEvent.OnBack) } },
         onInitCamera = remember {
             { lifecycleOwner, previewView ->
@@ -112,6 +121,8 @@ fun CameraRoute(
                 viewModel.onEvent(CameraEvent.OnZoomRatioChanged(zoomRatio))
             }
         },
+        onToggleTorch = remember { { viewModel.onEvent(CameraEvent.OnToggleTorch) } },
+        onToggleGridLines = remember { { viewModel.onEvent(CameraEvent.OnToggleGridLines) } },
         onNavigateToSettings = navigateToSettings
     )
 }

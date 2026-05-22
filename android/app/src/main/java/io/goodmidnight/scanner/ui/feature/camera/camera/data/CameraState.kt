@@ -8,6 +8,8 @@ data class CameraState(
     val isLoading: Boolean = false,
     val zoomRatio: Float = 1.0f,
     val zoomRatioRange: ClosedFloatingPointRange<Float> = 1.0f..1.0f,
+    val isTorchEnabled: Boolean = false,
+    val showGridLines: Boolean = false,
     override val uiState: UiState = UiState(),
     override val screenState: ScreenState = ScreenState.INITIAL,
 ) : BaseState

@@ -50,6 +50,13 @@ import io.goodmidnight.scanner.designsystem.component.SBodyMediumText
 import io.goodmidnight.scanner.designsystem.component.SLabelMediumText
 import io.goodmidnight.scanner.designsystem.preview.ComponentPreview
 import io.goodmidnight.scanner.designsystem.theme.Theme
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import io.goodmidnight.scanner.ui.core.utils.LocalSnackbarHostState
 import io.goodmidnight.scanner.ui.feature.camera.camera.data.CameraState
 import io.goodmidnight.scanner.ui.feature.camera.camera.ui.component.CaptureButton
@@ -57,13 +64,13 @@ import io.goodmidnight.scanner.ui.feature.camera.camera.ui.component.DocumentOve
 import io.goodmidnight.scanner.ui.feature.camera.camera.ui.component.SwipeableModeSelector
 import io.goodmidnight.scanner.ui.feature.camera.shared.SharedState
 
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun CameraScreen(
     modifier: Modifier = Modifier,
     state: CameraState,
     sharedState: SharedState,
+    shutterTriggerTime: Long = 0L,
     onBack: () -> Unit,
     onInitCamera: (LifecycleOwner, PreviewView) -> Unit,
     onTakePicture: () -> Unit,
@@ -71,6 +78,8 @@ fun CameraScreen(
     onChangeProcessingMode: (SharedState.CaptureMode) -> Unit,
     onShutdownCamera: () -> Unit,
     onZoomRatioChanged: (Float) -> Unit,
+    onToggleTorch: () -> Unit = {},
+    onToggleGridLines: () -> Unit = {},
     onNavigateToSettings: () -> Unit,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -135,6 +144,7 @@ fun CameraScreen(
                 else -> CameraPreviewAndControls(
                     state = state,
                     sharedState = sharedState,
+                    shutterTriggerTime = shutterTriggerTime,
                     lifecycleOwner = lifecycleOwner,
                     docPagerState = docPagerState,
                     procPagerState = procPagerState,
@@ -143,6 +153,9 @@ fun CameraScreen(
                     onInitCamera = onInitCamera,
                     onTakePicture = onTakePicture,
                     onZoomRatioChanged = onZoomRatioChanged,
+                    onToggleTorch = onToggleTorch,
+                    onToggleGridLines = onToggleGridLines,
+                    onBack = onBack,
                     onNavigateToSettings = onNavigateToSettings,
                 )
             }
@@ -185,6 +198,7 @@ private fun ProcessingScreen() {
 private fun CameraPreviewAndControls(
     state: CameraState,
     sharedState: SharedState,
+    shutterTriggerTime: Long,
     lifecycleOwner: LifecycleOwner,
     docPagerState: PagerState,
     procPagerState: PagerState,
@@ -193,11 +207,41 @@ private fun CameraPreviewAndControls(
     onInitCamera: (LifecycleOwner, PreviewView) -> Unit,
     onTakePicture: () -> Unit,
     onZoomRatioChanged: (Float) -> Unit,
+    onToggleTorch: () -> Unit,
+    onToggleGridLines: () -> Unit,
+    onBack: () -> Unit,
     onNavigateToSettings: () -> Unit,
 ) {
+    var flashOpacity by remember { mutableStateOf(0f) }
+    LaunchedEffect(shutterTriggerTime) {
+        if (shutterTriggerTime > 0L) {
+            flashOpacity = 1f
+            androidx.compose.animation.core.animate(
+                initialValue = 1f,
+                targetValue = 0f,
+                animationSpec = tween(durationMillis = 200)
+            ) { value, _ ->
+                flashOpacity = value
+            }
+        }
+    }
+
+    val currentZoomRatio by rememberUpdatedState(state.zoomRatio)
+    val currentZoomRatioRange by rememberUpdatedState(state.zoomRatioRange)
+    val currentOnZoomRatioChanged by rememberUpdatedState(onZoomRatioChanged)
+
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTransformGestures { _, _, zoom, _ ->
+                        if (zoom != 1.0f) {
+                            val newRatio = (currentZoomRatio * zoom).coerceIn(currentZoomRatioRange)
+                            currentOnZoomRatioChanged(newRatio)
+                        }
+                    }
+                },
             factory = { context ->
                 PreviewView(context).apply {
                     layoutParams = ViewGroup.LayoutParams(
@@ -216,7 +260,7 @@ private fun CameraPreviewAndControls(
             }
         }
 
-        if (sharedState.showGridLines) {
+        if (state.showGridLines) {
             GridOverlay()
         }
 
@@ -228,15 +272,45 @@ private fun CameraPreviewAndControls(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.End
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onNavigateToSettings) {
+                IconButton(onClick = onBack) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_settings),
-                        contentDescription = "Settings",
+                        imageVector = io.goodmidnight.scanner.designsystem.theme.Icons.ArrowBack,
+                        contentDescription = "Back",
                         tint = Color.White
                     )
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onToggleGridLines) {
+                        Icon(
+                            imageVector = io.goodmidnight.scanner.designsystem.theme.Icons.Grid3x3,
+                            contentDescription = "Toggle Grid Lines",
+                            tint = if (state.showGridLines) Theme.colorScheme.primary else Color.White
+                        )
+                    }
+
+                    IconButton(onClick = onToggleTorch) {
+                        Icon(
+                            imageVector = if (state.isTorchEnabled) io.goodmidnight.scanner.designsystem.theme.Icons.FlashOn else io.goodmidnight.scanner.designsystem.theme.Icons.FlashOff,
+                            contentDescription = "Toggle Torch",
+                            tint = if (state.isTorchEnabled) Theme.colorScheme.primary else Color.White
+                        )
+                    }
+
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_settings),
+                            contentDescription = "Settings",
+                            tint = Color.White
+                        )
+                    }
                 }
             }
 
@@ -253,18 +327,6 @@ private fun CameraPreviewAndControls(
                     items = docTypes.map { it.displayName },
                     modifier = Modifier.padding(vertical = 12.dp)
                 )
-
-                if (state.zoomRatioRange.endInclusive > state.zoomRatioRange.start) {
-                    Slider(
-                        value = state.zoomRatio,
-                        onValueChange = onZoomRatioChanged,
-                        valueRange = state.zoomRatioRange,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
-                    )
-                }
-
                 CaptureButton(onClick = onTakePicture)
                 SwipeableModeSelector(
                     pagerState = procPagerState,
@@ -273,6 +335,14 @@ private fun CameraPreviewAndControls(
                     modifier = Modifier.padding(vertical = 12.dp)
                 )
             }
+        }
+
+        if (flashOpacity > 0f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White.copy(alpha = flashOpacity))
+            )
         }
     }
 }
@@ -317,7 +387,6 @@ fun GridOverlay(
     }
 }
 
-
 @Composable
 @ComponentPreview
 fun SCameraScreenPreview() {
@@ -348,3 +417,4 @@ fun SCameraScreenPreview() {
         }
     }
 }
+

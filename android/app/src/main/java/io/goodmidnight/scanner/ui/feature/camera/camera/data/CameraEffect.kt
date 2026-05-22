@@ -7,4 +7,5 @@ sealed interface CameraEffect : BaseEffect {
     data object PopBackStack : CameraEffect
 
     data object NativeToResult: CameraEffect
+    data object TriggerShutterFeedback : CameraEffect
 }
