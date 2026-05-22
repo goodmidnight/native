@@ -9,51 +9,112 @@ import androidx.compose.ui.unit.sp
 import io.goodmidnight.scanner.designsystem.R
 
 data class Type(
-    val headlineLarge: TextStyle = TextStyle(
+    // Display styles (웅장하고 세련된 대형 텍스트)
+    val displayLarge: TextStyle = TextStyle(
+        fontFamily = PRETENDARD,
+        fontWeight = FontWeight.Bold,
+        fontSize = 40.sp,
+        lineHeight = 48.sp
+    ),
+    val displayMedium: TextStyle = TextStyle(
+        fontFamily = PRETENDARD,
+        fontWeight = FontWeight.Bold,
+        fontSize = 34.sp,
+        lineHeight = 40.sp
+    ),
+    val displaySmall: TextStyle = TextStyle(
         fontFamily = PRETENDARD,
         fontWeight = FontWeight.Bold,
         fontSize = 28.sp,
         lineHeight = 36.sp
     ),
-    val titleLarge: TextStyle = TextStyle(
+
+    // Heading styles (구조적인 타이틀 및 중요 헤더)
+    val headingXXLarge: TextStyle = TextStyle(
+        fontFamily = PRETENDARD,
+        fontWeight = FontWeight.Bold,
+        fontSize = 24.sp,
+        lineHeight = 30.sp
+    ),
+    val headingXLarge: TextStyle = TextStyle(
         fontFamily = PRETENDARD,
         fontWeight = FontWeight.Bold,
         fontSize = 22.sp,
         lineHeight = 28.sp
     ),
-    val titleMedium: TextStyle = TextStyle(
+    val headingLarge: TextStyle = TextStyle(
+        fontFamily = PRETENDARD,
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp,
+        lineHeight = 26.sp
+    ),
+    val headingMedium: TextStyle = TextStyle(
         fontFamily = PRETENDARD,
         fontWeight = FontWeight.SemiBold,
         fontSize = 18.sp,
         lineHeight = 24.sp
     ),
-    val titleSmall: TextStyle = TextStyle(
+    val headingSmall: TextStyle = TextStyle(
         fontFamily = PRETENDARD,
         fontWeight = FontWeight.SemiBold,
         fontSize = 16.sp,
-        lineHeight = 24.sp
+        lineHeight = 22.sp
     ),
-    val bodyLarge: TextStyle = TextStyle(
+    val headingXSmall: TextStyle = TextStyle(
         fontFamily = PRETENDARD,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp
-    ),
-    val bodyMedium: TextStyle = TextStyle(
-        fontFamily = PRETENDARD,
-        fontWeight = FontWeight.Normal,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 14.sp,
+        lineHeight = 20.sp
+    ),
+
+    // Label styles (버튼, 마커, 컨트롤 및 메타 텍스트)
+    val labelLarge: TextStyle = TextStyle(
+        fontFamily = PRETENDARD,
+        fontWeight = FontWeight.Medium,
+        fontSize = 16.sp,
         lineHeight = 20.sp
     ),
     val labelMedium: TextStyle = TextStyle(
         fontFamily = PRETENDARD,
         fontWeight = FontWeight.Medium,
-        fontSize = 12.sp,
-        lineHeight = 16.sp
+        fontSize = 14.sp,
+        lineHeight = 18.sp
     ),
     val labelSmall: TextStyle = TextStyle(
         fontFamily = PRETENDARD,
         fontWeight = FontWeight.Medium,
+        fontSize = 12.sp,
+        lineHeight = 16.sp
+    ),
+    val labelXSmall: TextStyle = TextStyle(
+        fontFamily = PRETENDARD,
+        fontWeight = FontWeight.Medium,
+        fontSize = 10.sp,
+        lineHeight = 14.sp
+    ),
+
+    // Paragraph styles (가독성이 뛰어난 본문 서술 텍스트)
+    val paragraphLarge: TextStyle = TextStyle(
+        fontFamily = PRETENDARD,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
+        lineHeight = 24.sp
+    ),
+    val paragraphMedium: TextStyle = TextStyle(
+        fontFamily = PRETENDARD,
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp,
+        lineHeight = 20.sp
+    ),
+    val paragraphSmall: TextStyle = TextStyle(
+        fontFamily = PRETENDARD,
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp,
+        lineHeight = 16.sp
+    ),
+    val paragraphXSmall: TextStyle = TextStyle(
+        fontFamily = PRETENDARD,
+        fontWeight = FontWeight.Normal,
         fontSize = 10.sp,
         lineHeight = 14.sp
     ),
@@ -72,5 +133,3 @@ data class Type(
         )
     }
 }
-
-

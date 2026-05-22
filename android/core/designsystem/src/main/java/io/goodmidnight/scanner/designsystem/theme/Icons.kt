@@ -1,86 +1,68 @@
 package io.goodmidnight.scanner.designsystem.theme
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.PlaylistAdd
-import androidx.compose.material.icons.automirrored.sharp.VolumeUp
-import androidx.compose.material.icons.outlined.Album
-import androidx.compose.material.icons.outlined.PlaylistRemove
-import androidx.compose.material.icons.outlined.VideoLabel
-import androidx.compose.material.icons.outlined.VideoLibrary
-import androidx.compose.material.icons.sharp.Add
-import androidx.compose.material.icons.sharp.AddCircleOutline
-import androidx.compose.material.icons.sharp.ArrowBackIosNew
-import androidx.compose.material.icons.sharp.ArrowDropDown
-import androidx.compose.material.icons.sharp.ArrowDropUp
-import androidx.compose.material.icons.sharp.Cancel
-import androidx.compose.material.icons.sharp.CheckCircle
-import androidx.compose.material.icons.sharp.ChevronRight
-import androidx.compose.material.icons.sharp.Clear
-import androidx.compose.material.icons.sharp.CreateNewFolder
-import androidx.compose.material.icons.sharp.Delete
-import androidx.compose.material.icons.sharp.Edit
-import androidx.compose.material.icons.sharp.FitScreen
-import androidx.compose.material.icons.sharp.Folder
-import androidx.compose.material.icons.sharp.Fullscreen
-import androidx.compose.material.icons.sharp.FullscreenExit
-import androidx.compose.material.icons.sharp.Home
-import androidx.compose.material.icons.sharp.Lock
-import androidx.compose.material.icons.sharp.Menu
-import androidx.compose.material.icons.sharp.MoreVert
-import androidx.compose.material.icons.sharp.Pause
-import androidx.compose.material.icons.sharp.PlayArrow
-import androidx.compose.material.icons.sharp.Repeat
-import androidx.compose.material.icons.sharp.RepeatOne
-import androidx.compose.material.icons.sharp.SaveAlt
-import androidx.compose.material.icons.sharp.Search
-import androidx.compose.material.icons.sharp.Share
-import androidx.compose.material.icons.sharp.Shuffle
-import androidx.compose.material.icons.sharp.ShuffleOn
-import androidx.compose.material.icons.sharp.SkipNext
-import androidx.compose.material.icons.sharp.SkipPrevious
-import androidx.compose.material.icons.sharp.Speed
-import androidx.compose.material.icons.sharp.SwapVert
-import androidx.compose.material.icons.sharp.Videocam
-import androidx.compose.material.icons.sharp.ViewComfyAlt
-import androidx.compose.material.icons.sharp.WbSunny
-import androidx.compose.material.icons.sharp.FlashOff
-import androidx.compose.material.icons.sharp.FlashOn
-import androidx.compose.material.icons.sharp.Grid3x3
-import androidx.compose.material.icons.automirrored.sharp.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
+import androidx.compose.material.icons.automirrored.rounded.VolumeUp
+import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.rounded.ArrowBackIosNew
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material.icons.rounded.ArrowDropUp
+import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.CreateNewFolder
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.FitScreen
+import androidx.compose.material.icons.rounded.FlashOff
+import androidx.compose.material.icons.rounded.FlashOn
+import androidx.compose.material.icons.rounded.Folder
+import androidx.compose.material.icons.rounded.Grid3x3
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.PlaylistRemove
+import androidx.compose.material.icons.rounded.Repeat
+import androidx.compose.material.icons.rounded.RepeatOne
+import androidx.compose.material.icons.rounded.SaveAlt
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.Shuffle
+import androidx.compose.material.icons.rounded.ShuffleOn
+import androidx.compose.material.icons.rounded.Videocam
+import androidx.compose.material.icons.rounded.ViewComfyAlt
+import androidx.compose.material.icons.rounded.WbSunny
 import androidx.compose.ui.graphics.vector.ImageVector
 
 object Icons {
-    val ArrowDropDown: ImageVector = Icons.Sharp.ArrowDropDown
-    val ArrowDropUp: ImageVector = Icons.Sharp.ArrowDropUp
-    val ArrowBackIosNew: ImageVector = Icons.Sharp.ArrowBackIosNew
+    val ArrowDropDown: ImageVector = Icons.Rounded.ArrowDropDown
+    val ArrowDropUp: ImageVector = Icons.Rounded.ArrowDropUp
+    val ArrowBackIosNew: ImageVector = Icons.Rounded.ArrowBackIosNew
 
-    val ViewComfyAlt: ImageVector = Icons.Sharp.ViewComfyAlt
-    val Clear: ImageVector = Icons.Sharp.Clear
+    val ViewComfyAlt: ImageVector = Icons.Rounded.ViewComfyAlt
+    val Clear: ImageVector = Icons.Rounded.Clear
 
-    val CreateNewFolder: ImageVector = Icons.Sharp.CreateNewFolder
-    val Folder: ImageVector = Icons.Sharp.Folder
-    val Search: ImageVector = Icons.Sharp.Search
-    val Album: ImageVector = Icons.Outlined.Album
+    val CreateNewFolder: ImageVector = Icons.Rounded.CreateNewFolder
+    val Folder: ImageVector = Icons.Rounded.Folder
+    val Search: ImageVector = Icons.Rounded.Search
+    val Album: ImageVector = Icons.Rounded.Album
 
-    val PlaylistAdd: ImageVector = Icons.AutoMirrored.Outlined.PlaylistAdd
-    val PlaylistRemove: ImageVector = Icons.Outlined.PlaylistRemove
-    val Home: ImageVector = Icons.Sharp.Home
-    val VideoCam: ImageVector = Icons.Sharp.Videocam
-    val Delete: ImageVector = Icons.Sharp.Delete
-    val Share: ImageVector = Icons.Sharp.Share
+    val PlaylistAdd: ImageVector = Icons.AutoMirrored.Rounded.PlaylistAdd
+    val PlaylistRemove: ImageVector = Icons.Rounded.PlaylistRemove
+    val Home: ImageVector = Icons.Rounded.Home
+    val VideoCam: ImageVector = Icons.Rounded.Videocam
+    val Delete: ImageVector = Icons.Rounded.Delete
+    val Share: ImageVector = Icons.Rounded.Share
 
-    val Repeat: ImageVector = Icons.Sharp.Repeat
-    val RepeatOne: ImageVector = Icons.Sharp.RepeatOne
-    val Shuffle: ImageVector = Icons.Sharp.Shuffle
-    val ShuffleOn: ImageVector = Icons.Sharp.ShuffleOn
+    val Repeat: ImageVector = Icons.Rounded.Repeat
+    val RepeatOne: ImageVector = Icons.Rounded.RepeatOne
+    val Shuffle: ImageVector = Icons.Rounded.Shuffle
+    val ShuffleOn: ImageVector = Icons.Rounded.ShuffleOn
 
-    val VolumeUp: ImageVector = Icons.AutoMirrored.Sharp.VolumeUp
-    val Brightness: ImageVector = Icons.Sharp.WbSunny
-    val FitScreen: ImageVector = Icons.Sharp.FitScreen
-    val ChevronRight: ImageVector = Icons.Sharp.ChevronRight
-    val SaveAlt : ImageVector = Icons.Sharp.SaveAlt
-    val FlashOn: ImageVector = Icons.Sharp.FlashOn
-    val FlashOff: ImageVector = Icons.Sharp.FlashOff
-    val Grid3x3: ImageVector = Icons.Sharp.Grid3x3
-    val ArrowBack: ImageVector = Icons.AutoMirrored.Sharp.ArrowBack
+    val VolumeUp: ImageVector = Icons.AutoMirrored.Rounded.VolumeUp
+    val Brightness: ImageVector = Icons.Rounded.WbSunny
+    val FitScreen: ImageVector = Icons.Rounded.FitScreen
+    val ChevronRight: ImageVector = Icons.Rounded.KeyboardArrowRight // Rounded에는 ChevronRight가 KeyboardArrowRight로 불리기도 하므로 호환성을 높임
+    val SaveAlt : ImageVector = Icons.Rounded.SaveAlt
+    val FlashOn: ImageVector = Icons.Rounded.FlashOn
+    val FlashOff: ImageVector = Icons.Rounded.FlashOff
+    val Grid3x3: ImageVector = Icons.Rounded.Grid3x3
+    val ArrowBack: ImageVector = Icons.AutoMirrored.Rounded.ArrowBack
 }
