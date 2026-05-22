@@ -13,9 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Remove
+import io.goodmidnight.scanner.designsystem.theme.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -79,7 +77,7 @@ fun SStepper(
             contentAlignment = Alignment.Center
         ) {
             SIcon(
-                imageVector = Icons.Rounded.Remove,
+                imageVector = Icons.Remove,
                 contentDescription = "감소",
                 tint = if (canDecrement) Theme.colorScheme.primaryText else Theme.colorScheme.disabledText,
                 modifier = Modifier.size(18.dp)
@@ -112,7 +110,7 @@ fun SStepper(
             contentAlignment = Alignment.Center
         ) {
             SIcon(
-                imageVector = Icons.Rounded.Add,
+                imageVector = Icons.Add,
                 contentDescription = "증가",
                 tint = if (canIncrement) Theme.colorScheme.primaryText else Theme.colorScheme.disabledText,
                 modifier = Modifier.size(18.dp)

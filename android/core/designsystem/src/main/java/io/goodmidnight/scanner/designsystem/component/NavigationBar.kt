@@ -19,10 +19,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Menu
-import androidx.compose.material.icons.rounded.VideoLabel
-import androidx.compose.material.icons.rounded.VideoLibrary
+import io.goodmidnight.scanner.designsystem.theme.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -155,8 +152,8 @@ fun SNavigationBarPreview() {
         ) {
             SNavigationBar(
                 items = listOf(
-                    NavigationItem("library", "보관함", Icons.Rounded.VideoLabel, "library"),
-                    NavigationItem("menu", "메뉴", Icons.Rounded.Menu, "menu")
+                    NavigationItem("library", "보관함", Icons.Library, "library"),
+                    NavigationItem("menu", "메뉴", Icons.Menu, "menu")
                 ),
                 currentRoute = "scan",
                 onItemClick = {}

@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Check
+import io.goodmidnight.scanner.designsystem.theme.Icons
+import io.goodmidnight.scanner.designsystem.theme.Theme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,7 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.goodmidnight.scanner.designsystem.modifier.bounceClick
 import io.goodmidnight.scanner.designsystem.preview.ComponentPreview
-import io.goodmidnight.scanner.designsystem.theme.Theme
 
 /**
  * [SCheckBox]
@@ -79,7 +78,7 @@ fun SCheckBox(
         contentAlignment = Alignment.Center
     ) {
         SIcon(
-            imageVector = Icons.Rounded.Check,
+            imageVector = Icons.Check,
             contentDescription = null,
             tint = Theme.colorScheme.onAccent,
             modifier = Modifier

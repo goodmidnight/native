@@ -17,8 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import io.goodmidnight.scanner.designsystem.theme.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,7 +69,7 @@ fun SAccordion(
                 color = Theme.colorScheme.primaryText
             )
             SIcon(
-                imageVector = Icons.Rounded.KeyboardArrowDown,
+                imageVector = Icons.KeyboardArrowDown,
                 contentDescription = if (expanded) "접기" else "펼치기",
                 tint = Theme.colorScheme.secondaryText,
                 modifier = Modifier
