@@ -43,6 +43,10 @@ import androidx.compose.material.icons.sharp.SwapVert
 import androidx.compose.material.icons.sharp.Videocam
 import androidx.compose.material.icons.sharp.ViewComfyAlt
 import androidx.compose.material.icons.sharp.WbSunny
+import androidx.compose.material.icons.sharp.FlashOff
+import androidx.compose.material.icons.sharp.FlashOn
+import androidx.compose.material.icons.sharp.Grid3x3
+import androidx.compose.material.icons.automirrored.sharp.ArrowBack
 import androidx.compose.ui.graphics.vector.ImageVector
 
 object Icons {
@@ -75,4 +79,8 @@ object Icons {
     val FitScreen: ImageVector = Icons.Sharp.FitScreen
     val ChevronRight: ImageVector = Icons.Sharp.ChevronRight
     val SaveAlt : ImageVector = Icons.Sharp.SaveAlt
+    val FlashOn: ImageVector = Icons.Sharp.FlashOn
+    val FlashOff: ImageVector = Icons.Sharp.FlashOff
+    val Grid3x3: ImageVector = Icons.Sharp.Grid3x3
+    val ArrowBack: ImageVector = Icons.AutoMirrored.Sharp.ArrowBack
 }
