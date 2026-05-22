@@ -11,17 +11,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -30,12 +29,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import io.goodmidnight.scanner.designsystem.modifier.bounceClick
+import io.goodmidnight.scanner.designsystem.modifier.softShadow
 import io.goodmidnight.scanner.designsystem.preview.ComponentPreview
 import io.goodmidnight.scanner.designsystem.theme.Alpha
 import io.goodmidnight.scanner.designsystem.theme.Icons
@@ -57,7 +59,7 @@ fun SUnderlineTextField(
 
     val textSelectionColors = TextSelectionColors(
         handleColor = Theme.colorScheme.accent,
-        backgroundColor = Theme.colorScheme.accent.copy(Alpha.LOW)
+        backgroundColor = Theme.colorScheme.accent.copy(alpha = Alpha.LOW)
     )
     val textColor: Color by animateColorAsState(
         if (enabled) Theme.colorScheme.primaryText
@@ -67,7 +69,6 @@ fun SUnderlineTextField(
         if (enabled) Theme.colorScheme.outline
         else Theme.colorScheme.outlineVariant, label = "outlineColor"
     )
-
 
     CompositionLocalProvider(
         LocalTextSelectionColors provides textSelectionColors
@@ -85,15 +86,14 @@ fun SUnderlineTextField(
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             enabled = enabled,
-            textStyle = Theme.type.bodyMedium.copy(color = textColor),
+            textStyle = Theme.type.paragraphMedium.copy(color = textColor),
             cursorBrush = SolidColor(Theme.colorScheme.accent),
             decorationBox = { text ->
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
-                        modifier = Modifier,
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -106,7 +106,7 @@ fun SUnderlineTextField(
                         ) {
                             Box {
                                 if (value.isEmpty()) {
-                                    SBodyMediumText(
+                                    SParagraphMediumText(
                                         text = placeHolder ?: "",
                                         color = Theme.colorScheme.disabledText,
                                     )
@@ -116,20 +116,26 @@ fun SUnderlineTextField(
                         }
 
                         if (value.isNotEmpty()) {
-                            IconButton(onClick = { onValueChange("") }) {
-                                Icon(
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .bounceClick(onClick = { onValueChange("") }),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                SIcon(
                                     imageVector = Icons.Clear,
                                     contentDescription = "Clear text",
-                                    tint = Theme.colorScheme.secondaryIcon
+                                    tint = Theme.colorScheme.secondaryIcon,
+                                    modifier = Modifier.size(18.dp)
                                 )
                             }
                         }
                     }
-                    HorizontalDivider(
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth(),
-                        color = outlineColor,
-                        thickness = 1.dp
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(outlineColor)
                     )
                 }
             }
@@ -153,12 +159,14 @@ fun SContainerTextField(
 
     val textSelectionColors = TextSelectionColors(
         handleColor = Theme.colorScheme.accent,
-        backgroundColor = Theme.colorScheme.accent.copy(Alpha.LOW)
+        backgroundColor = Theme.colorScheme.accent.copy(alpha = Alpha.LOW)
     )
     val textColor: Color by animateColorAsState(
         if (enabled) Theme.colorScheme.primaryText
         else Theme.colorScheme.disabledText, label = "textColor"
     )
+
+    val fieldShape = RoundedCornerShape(24.dp)
 
     CompositionLocalProvider(
         LocalTextSelectionColors provides textSelectionColors
@@ -176,18 +184,17 @@ fun SContainerTextField(
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             enabled = enabled,
-            textStyle = Theme.type.bodyMedium.copy(color = textColor),
+            textStyle = Theme.type.paragraphMedium.copy(color = textColor),
             cursorBrush = SolidColor(Theme.colorScheme.accent),
             decorationBox = { text ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 48.dp)
-                        .background(
-                            color = Theme.colorScheme.surfaceVariant,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(horizontal = 12.dp),
+                        .softShadow(borderRadius = 24.dp, shadowRadius = 15.dp, offsetY = 2.dp)
+                        .clip(fieldShape)
+                        .background(color = Theme.colorScheme.surface)
+                        .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -199,7 +206,7 @@ fun SContainerTextField(
                     ) {
                         Box {
                             if (value.isEmpty()) {
-                                SBodyMediumText(
+                                SParagraphMediumText(
                                     text = placeHolder ?: "",
                                     color = Theme.colorScheme.secondaryText,
                                 )
@@ -209,11 +216,17 @@ fun SContainerTextField(
                     }
 
                     if (value.isNotEmpty()) {
-                        IconButton(onClick = { onValueChange("") }) {
-                            Icon(
-                                imageVector = Icons.Clear,
-                                contentDescription = "Clear text",
-                                tint = Theme.colorScheme.secondaryIcon
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .bounceClick(onClick = { onValueChange("") }),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            SIcon(
+                                    imageVector = Icons.Clear,
+                                    contentDescription = "Clear text",
+                                    tint = Theme.colorScheme.secondaryIcon,
+                                    modifier = Modifier.size(18.dp)
                             )
                         }
                     }
@@ -238,12 +251,14 @@ fun SSearchTextField(
 
     val textSelectionColors = TextSelectionColors(
         handleColor = Theme.colorScheme.accent,
-        backgroundColor = Theme.colorScheme.accent.copy(Alpha.LOW)
+        backgroundColor = Theme.colorScheme.accent.copy(alpha = Alpha.LOW)
     )
     val textColor: Color by animateColorAsState(
         if (enabled) Theme.colorScheme.primaryText
         else Theme.colorScheme.disabledText, label = "textColor"
     )
+
+    val fieldShape = RoundedCornerShape(24.dp) 
 
     CompositionLocalProvider(
         LocalTextSelectionColors provides textSelectionColors
@@ -265,17 +280,16 @@ fun SSearchTextField(
                 onSearch = { onSearch(value) }
             ),
             enabled = enabled,
-            textStyle = Theme.type.bodyMedium.copy(color = textColor),
+            textStyle = Theme.type.paragraphMedium.copy(color = textColor),
             cursorBrush = SolidColor(Theme.colorScheme.accent),
             decorationBox = { text ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(
-                            color = Theme.colorScheme.surfaceVariant,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(start = 12.dp),
+                        .softShadow(borderRadius = 24.dp, shadowRadius = 15.dp, offsetY = 2.dp)
+                        .clip(fieldShape)
+                        .background(color = Theme.colorScheme.surface)
+                        .padding(start = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -287,7 +301,7 @@ fun SSearchTextField(
                     ) {
                         Box {
                             if (value.isEmpty()) {
-                                SBodyMediumText(
+                                SParagraphMediumText(
                                     text = placeHolder ?: "",
                                     color = Theme.colorScheme.secondaryText,
                                 )
@@ -304,19 +318,31 @@ fun SSearchTextField(
                             enter = fadeIn(),
                             exit = fadeOut()
                         ) {
-                            IconButton(onClick = { onValueChange("") }) {
-                                Icon(
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .bounceClick(onClick = { onValueChange("") }),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                SIcon(
                                     imageVector = Icons.Clear,
                                     contentDescription = "Clear text",
-                                    tint = Theme.colorScheme.secondaryIcon
+                                    tint = Theme.colorScheme.secondaryIcon,
+                                    modifier = Modifier.size(18.dp)
                                 )
                             }
                         }
-                        IconButton(onClick = { onSearch(value) }) {
-                            Icon(
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .bounceClick(onClick = { onSearch(value) }),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            SIcon(
                                 imageVector = Icons.Search,
                                 contentDescription = "Search",
-                                tint = Theme.colorScheme.primaryIcon
+                                tint = Theme.colorScheme.primaryIcon,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }
@@ -334,24 +360,24 @@ fun STextFieldPreview() {
         Column(
             modifier = Modifier
                 .background(Theme.colorScheme.background)
-                .padding(16.dp),
+                .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             SUnderlineTextField(
                 value = value,
                 onValueChange = { value = it },
-                placeHolder = "Underline text field"
+                placeHolder = "이름을 입력하세요"
             )
             SContainerTextField(
                 value = value,
                 onValueChange = { value = it },
-                placeHolder = "Container text field"
+                placeHolder = "둥글고 은은한 입력창"
             )
             SSearchTextField(
                 value = value,
                 onValueChange = { value = it },
                 onSearch = {},
-                placeHolder = "Search text field"
+                placeHolder = "검색어 입력"
             )
         }
     }

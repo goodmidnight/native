@@ -10,7 +10,9 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import io.goodmidnight.scanner.designsystem.modifier.softShadow
 import io.goodmidnight.scanner.designsystem.preview.ComponentPreview
 import io.goodmidnight.scanner.designsystem.theme.Theme
 
@@ -31,22 +33,22 @@ fun SSnackbar(
 fun SSnackbarComponent(
     message: String,
 ) {
+    val snackbarShape = RoundedCornerShape(24.dp)
+
     Box(
         modifier = Modifier
             .systemBarsPadding()
             .padding(16.dp)
             .fillMaxWidth()
-            .background(
-                color = Theme.colorScheme.snackbarContainer,
-                shape = RoundedCornerShape(8.dp)
-            )
+            .softShadow(borderRadius = 24.dp, shadowRadius = 20.dp, offsetY = 4.dp)
+            .clip(snackbarShape)
+            .background(color = Theme.colorScheme.snackbarContainer)
             .padding(
-                horizontal = 12.dp,
-                vertical = 16.dp
+                horizontal = 20.dp,
+                vertical = 14.dp
             )
-
     ) {
-        SBodyLargeText(
+        SParagraphLargeText(
             text = message,
             color = Theme.colorScheme.onSnackbarContainer
         )
@@ -58,7 +60,7 @@ fun SSnackbarComponent(
 fun SSnackbarPreview() {
     Theme {
         SSnackbarComponent(
-            message = "스낵바 메시지입니다."
+            message = "사진이 문서 보관함에 안전하게 저장되었습니다."
         )
     }
 }

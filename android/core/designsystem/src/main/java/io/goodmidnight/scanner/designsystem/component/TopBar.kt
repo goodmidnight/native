@@ -1,26 +1,25 @@
 package io.goodmidnight.scanner.designsystem.component
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import io.goodmidnight.scanner.designsystem.modifier.noRippleClickable
+import io.goodmidnight.scanner.designsystem.modifier.bounceClick
 import io.goodmidnight.scanner.designsystem.preview.ComponentPreview
 import io.goodmidnight.scanner.designsystem.theme.Icons
 import io.goodmidnight.scanner.designsystem.theme.Theme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun STitleTopBar(
     title: String,
@@ -28,68 +27,78 @@ fun STitleTopBar(
     onBack: (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
-    Column {
-        CenterAlignedTopAppBar(
-            modifier = modifier,
-            title = {
-                STitleLargeText(
-                    title,
-                    maxLines = 1,
-                    overflow = TextOverflow.Clip
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .background(Theme.colorScheme.background)
+            .padding(horizontal = 16.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        if (onBack != null) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .bounceClick(onClick = onBack),
+                contentAlignment = Alignment.Center
+            ) {
+                SIcon(
+                    imageVector = Icons.ArrowBackIosNew,
+                    contentDescription = null,
+                    tint = Theme.colorScheme.primaryIcon,
+                    modifier = Modifier.size(20.dp)
                 )
-            },
-            navigationIcon = {
-                onBack?.let {
-                    Row(
-                        modifier = Modifier.padding(start = 8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.ArrowBackIosNew,
-                            contentDescription = "${Icons.ArrowBackIosNew}",
-                            modifier = Modifier
-                                .size(24.dp)
-                                .noRippleClickable { it() },
-                        )
-                    }
-                }
-            },
-            actions = actions,
-            colors = TopAppBarDefaults.topAppBarColors().copy(
-                containerColor = Theme.colorScheme.background,
-                scrolledContainerColor = Theme.colorScheme.background,
-                navigationIconContentColor = Theme.colorScheme.primaryIcon,
-                titleContentColor = Theme.colorScheme.primaryIcon,
-                actionIconContentColor = Theme.colorScheme.primaryIcon
-            ),
+            }
+        }
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            STitleLargeText(
+                text = title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
+            )
+        }
+
+        Row(
+            modifier = Modifier.align(Alignment.CenterEnd),
+            verticalAlignment = Alignment.CenterVertically,
+            content = actions
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SMainTopBar(
     title: String,
     modifier: Modifier = Modifier,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
-    TopAppBar(
-        modifier = modifier,
-        title = {
-            STitleLargeText(title)
-        },
-        navigationIcon = {},
-        actions = actions,
-        colors = TopAppBarDefaults.topAppBarColors().copy(
-            containerColor = Theme.colorScheme.background,
-            scrolledContainerColor = Theme.colorScheme.background,
-            navigationIconContentColor = Theme.colorScheme.primaryIcon,
-            titleContentColor = Theme.colorScheme.primaryIcon,
-            actionIconContentColor = Theme.colorScheme.primaryIcon
-        ),
-    )
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .background(Theme.colorScheme.background)
+            .padding(horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(modifier = Modifier.weight(1f)) {
+            STitleLargeText(
+                text = title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            content = actions
+        )
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SSearchTopBar(
     value: String,
@@ -99,47 +108,50 @@ fun SSearchTopBar(
     focusRequester: FocusRequester? = null,
     onBack: (() -> Unit)? = null,
 ) {
-    CenterAlignedTopAppBar(
-        modifier = modifier,
-        title = {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .background(Theme.colorScheme.background)
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (onBack != null) {
+            Box(
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .size(40.dp)
+                    .bounceClick(onClick = onBack),
+                contentAlignment = Alignment.Center
+            ) {
+                SIcon(
+                    imageVector = Icons.ArrowBackIosNew,
+                    contentDescription = null,
+                    tint = Theme.colorScheme.primaryIcon,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
+        Box(modifier = Modifier.weight(1f)) {
             SSearchTextField(
                 value = value,
                 onValueChange = onValueChange,
                 onSearch = onSearch,
                 focusRequester = focusRequester
             )
-        },
-        navigationIcon = {
-            onBack?.let {
-                Row(
-                    modifier = Modifier.padding(start = 8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.ArrowBackIosNew,
-                        contentDescription = "${Icons.ArrowBackIosNew}",
-                        modifier = Modifier
-                            .size(24.dp)
-                            .noRippleClickable { it() },
-                    )
-                }
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors().copy(
-            containerColor = Theme.colorScheme.background,
-            scrolledContainerColor = Theme.colorScheme.background,
-            navigationIconContentColor = Theme.colorScheme.primaryIcon,
-            titleContentColor = Theme.colorScheme.primaryIcon,
-            actionIconContentColor = Theme.colorScheme.primaryIcon
-        ),
-    )
+        }
+    }
 }
-
 
 @Composable
 @ComponentPreview
 fun STitleTopBarPreview() {
     Theme {
-        STitleTopBar("타이틀", onBack = {})
+        STitleTopBar(
+            title = "문서 편집",
+            onBack = {}
+        )
     }
 }
 
@@ -147,19 +159,8 @@ fun STitleTopBarPreview() {
 @ComponentPreview
 fun SMainTopBarPreview() {
     Theme {
-        SMainTopBar("타이틀")
-    }
-}
-
-
-@Composable
-@ComponentPreview
-fun SSearchTopBarPreview() {
-    Theme {
-        SSearchTopBar(
-            value = "",
-            onSearch = {},
-            onValueChange = {},
+        SMainTopBar(
+            title = "보관함"
         )
     }
 }

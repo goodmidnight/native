@@ -1,5 +1,11 @@
 package io.goodmidnight.scanner.designsystem.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,14 +17,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import io.goodmidnight.scanner.designsystem.modifier.softShadow
 import io.goodmidnight.scanner.designsystem.preview.ComponentPreview
 import io.goodmidnight.scanner.designsystem.theme.Theme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun SDialog(
@@ -26,19 +42,41 @@ fun SDialog(
     properties: DialogProperties = DialogProperties(),
     content: @Composable ColumnScope.() -> Unit
 ) {
+    var isAnimatedVisible by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        isAnimatedVisible = true
+    }
+
+    val animateDismiss = {
+        coroutineScope.launch {
+            isAnimatedVisible = false
+            delay(180)
+            onDismissRequest()
+        }
+    }
+
     Dialog(
-        onDismissRequest = onDismissRequest,
+        onDismissRequest = { animateDismiss() },
         properties = properties
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(Theme.colorScheme.surface)
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            content = content
-        )
+        AnimatedVisibility(
+            visible = isAnimatedVisible,
+            enter = scaleIn(initialScale = 0.92f, animationSpec = spring(dampingRatio = 0.78f, stiffness = 400f)) + fadeIn(),
+            exit = scaleOut(targetScale = 0.95f, animationSpec = spring(dampingRatio = 0.85f, stiffness = 450f)) + fadeOut()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .softShadow(borderRadius = 28.dp, shadowRadius = 30.dp, offsetY = 6.dp)
+                    .clip(RoundedCornerShape(28.dp))
+                    .background(Theme.colorScheme.surface)
+                    .padding(28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                content = content
+            )
+        }
     }
 }
 
@@ -53,22 +91,22 @@ fun SConfirmDialog(
     onDismiss: (() -> Unit)? = null,
 ) {
     SDialog(onDismissRequest = onDismissRequest) {
-        STitleMediumText(
+        SHeadingMediumText(
             text = title,
             modifier = Modifier.fillMaxWidth(),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Start
+            textAlign = TextAlign.Start
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        SBodyMediumText(
+        Spacer(modifier = Modifier.height(12.dp))
+        SParagraphMediumText(
             text = message,
             modifier = Modifier.fillMaxWidth(),
             color = Theme.colorScheme.secondaryText,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Start
+            textAlign = TextAlign.Start
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(28.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+            horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End)
         ) {
             if (dismissText != null) {
                 SButton(
@@ -98,10 +136,10 @@ fun SConfirmDialog(
 fun SConfirmDialogPreview() {
     Theme {
         SConfirmDialog(
-            title = "확인창",
-            message = "정말로 진행하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-            confirmText = "확인",
-            dismissText = "취소",
+            title = "작업 승인",
+            message = "이 설정을 적용하면 기존 디자인시스템이 우버 스타일 모노톤으로 전면 개편됩니다. 진행할까요?",
+            confirmText = "승인하기",
+            dismissText = "돌아가기",
             onConfirm = {},
             onDismissRequest = {}
         )

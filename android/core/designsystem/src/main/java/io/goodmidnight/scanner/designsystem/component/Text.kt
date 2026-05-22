@@ -1,16 +1,374 @@
 package io.goodmidnight.scanner.designsystem.component
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Text
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import io.goodmidnight.scanner.designsystem.preview.ComponentPreview
 import io.goodmidnight.scanner.designsystem.theme.Theme
+
+@Composable
+private fun SBaseText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+    style: TextStyle = TextStyle.Default,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null,
+    textDecoration: TextDecoration? = null,
+    fontWeight: FontWeight? = null,
+) {
+    val mergedStyle = style.copy(
+        color = color,
+        textAlign = textAlign ?: style.textAlign,
+        textDecoration = textDecoration ?: style.textDecoration,
+        fontWeight = fontWeight ?: style.fontWeight
+    )
+    BasicText(
+        text = text,
+        modifier = modifier,
+        style = mergedStyle,
+        maxLines = maxLines,
+        overflow = overflow
+    )
+}
+
+@Composable
+fun SDisplayLargeText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null,
+) {
+    SBaseText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = Theme.type.displayLarge,
+        maxLines = maxLines,
+        overflow = overflow,
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun SDisplayMediumText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null,
+) {
+    SBaseText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = Theme.type.displayMedium,
+        maxLines = maxLines,
+        overflow = overflow,
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun SDisplaySmallText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null,
+) {
+    SBaseText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = Theme.type.displaySmall,
+        maxLines = maxLines,
+        overflow = overflow,
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun SHeadingXXLargeText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null,
+) {
+    SBaseText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = Theme.type.headingXXLarge,
+        maxLines = maxLines,
+        overflow = overflow,
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun SHeadingXLargeText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null,
+) {
+    SBaseText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = Theme.type.headingXLarge,
+        maxLines = maxLines,
+        overflow = overflow,
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun SHeadingLargeText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null,
+) {
+    SBaseText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = Theme.type.headingLarge,
+        maxLines = maxLines,
+        overflow = overflow,
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun SHeadingMediumText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null,
+) {
+    SBaseText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = Theme.type.headingMedium,
+        maxLines = maxLines,
+        overflow = overflow,
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun SHeadingSmallText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null,
+) {
+    SBaseText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = Theme.type.headingSmall,
+        maxLines = maxLines,
+        overflow = overflow,
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun SHeadingXSmallText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null,
+) {
+    SBaseText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = Theme.type.headingXSmall,
+        maxLines = maxLines,
+        overflow = overflow,
+        textAlign = textAlign
+    )
+}
+
+// --- Label Styles (컨트롤, 버튼, 미니 메타데이터) ---
+
+@Composable
+fun SLabelLargeText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+    textAlign: TextAlign? = null,
+) {
+    SBaseText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = Theme.type.labelLarge,
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun SLabelMediumText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+    textAlign: TextAlign? = null,
+) {
+    SBaseText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = Theme.type.labelMedium,
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun SLabelSmallText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+    textAlign: TextAlign? = null,
+) {
+    SBaseText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = Theme.type.labelSmall,
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun SLabelXSmallText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+) {
+    SBaseText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = Theme.type.labelXSmall
+    )
+}
+
+// --- Paragraph Styles (본문 설명 텍스트) ---
+
+@Composable
+fun SParagraphLargeText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null,
+) {
+    SBaseText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = Theme.type.paragraphLarge,
+        maxLines = maxLines,
+        overflow = overflow,
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun SParagraphMediumText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null,
+    fontWeight: FontWeight? = null,
+) {
+    SBaseText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = Theme.type.paragraphMedium,
+        maxLines = maxLines,
+        overflow = overflow,
+        textAlign = textAlign,
+        fontWeight = fontWeight
+    )
+}
+
+@Composable
+fun SParagraphSmallText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null,
+) {
+    SBaseText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = Theme.type.paragraphSmall,
+        maxLines = maxLines,
+        overflow = overflow,
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun SParagraphXSmallText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Theme.colorScheme.primaryText,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null,
+) {
+    SBaseText(
+        text = text,
+        modifier = modifier,
+        color = color,
+        style = Theme.type.paragraphXSmall,
+        maxLines = maxLines,
+        overflow = overflow,
+        textAlign = textAlign
+    )
+}
+
+// --- 하위 호환용 래퍼 컴포넌트 (기존 코드 연동용) ---
 
 @Composable
 fun SHeadlineLargeText(
@@ -22,11 +380,11 @@ fun SHeadlineLargeText(
     textAlign: TextAlign? = null,
     textDecoration: TextDecoration? = null,
 ) {
-    Text(
+    SBaseText(
         text = text,
         modifier = modifier,
         color = color,
-        style = Theme.type.headlineLarge,
+        style = Theme.type.displaySmall,
         overflow = overflow,
         maxLines = maxLines,
         textAlign = textAlign,
@@ -43,11 +401,11 @@ fun STitleLargeText(
     overflow: TextOverflow = TextOverflow.Clip,
     textAlign: TextAlign? = null,
 ) {
-    Text(
+    SBaseText(
         text = text,
         modifier = modifier,
         color = color,
-        style = Theme.type.titleLarge,
+        style = Theme.type.headingXLarge,
         overflow = overflow,
         maxLines = maxLines,
         textAlign = textAlign,
@@ -63,11 +421,11 @@ fun STitleMediumText(
     overflow: TextOverflow = TextOverflow.Clip,
     textAlign: TextAlign? = null,
 ) {
-    Text(
+    SBaseText(
         text = text,
         modifier = modifier,
         color = color,
-        style = Theme.type.titleMedium,
+        style = Theme.type.headingMedium,
         overflow = overflow,
         maxLines = maxLines,
         textAlign = textAlign,
@@ -83,11 +441,11 @@ fun STitleSmallText(
     overflow: TextOverflow = TextOverflow.Clip,
     textAlign: TextAlign? = null,
 ) {
-    Text(
+    SBaseText(
         text = text,
         modifier = modifier,
         color = color,
-        style = Theme.type.titleSmall,
+        style = Theme.type.headingSmall,
         overflow = overflow,
         maxLines = maxLines,
         textAlign = textAlign,
@@ -103,11 +461,11 @@ fun SBodyLargeText(
     overflow: TextOverflow = TextOverflow.Clip,
     textAlign: TextAlign? = null,
 ) {
-    Text(
+    SBaseText(
         text = text,
         modifier = modifier,
         color = color,
-        style = Theme.type.bodyLarge,
+        style = Theme.type.paragraphLarge,
         maxLines = maxLines,
         overflow = overflow,
         textAlign = textAlign,
@@ -124,11 +482,11 @@ fun SBodyMediumText(
     textAlign: TextAlign? = null,
     fontWeight: FontWeight? = null,
 ) {
-    Text(
+    SBaseText(
         text = text,
         modifier = modifier,
         color = color,
-        style = Theme.type.bodyMedium,
+        style = Theme.type.paragraphMedium,
         maxLines = maxLines,
         overflow = overflow,
         textAlign = textAlign,
@@ -137,47 +495,15 @@ fun SBodyMediumText(
 }
 
 @Composable
-fun SLabelMediumText(
-    text: String,
-    modifier: Modifier = Modifier,
-    color: Color = Theme.colorScheme.primaryText,
-) {
-    Text(
-        text = text,
-        modifier = modifier,
-        color = color,
-        style = Theme.type.labelMedium
-    )
-}
-
-@Composable
-fun SLabelSmallText(
-    text: String,
-    modifier: Modifier = Modifier,
-    color: Color = Theme.colorScheme.primaryText,
-) {
-    Text(
-        text = text,
-        modifier = modifier,
-        color = color,
-        style = Theme.type.labelSmall
-    )
-}
-
-
-@Composable
 @ComponentPreview
 fun STextPreview() {
     Theme {
         Column {
-            SHeadlineLargeText(text = "Headline Large (28sp Bold)")
-            STitleLargeText(text = "Title Large (22sp Bold)")
-            STitleMediumText(text = "Title Medium (18sp SemiBold)")
-            STitleSmallText(text = "Title Small (16sp SemiBold)")
-            SBodyLargeText(text = "Body Large (16sp Normal)")
-            SBodyMediumText(text = "Body Medium (14sp Normal)")
-            SLabelMediumText(text = "Label Medium (12sp Medium)")
-            SLabelSmallText(text = "Label Small (10sp Medium)")
+            SDisplayLargeText(text = "Display Large (40sp Bold)")
+            SHeadingXXLargeText(text = "Heading XXLarge (24sp Bold)")
+            SHeadingMediumText(text = "Heading Medium (18sp SemiBold)")
+            SParagraphMediumText(text = "Paragraph Medium (14sp Normal)")
+            SLabelMediumText(text = "Label Medium (14sp Medium)")
         }
     }
 }
