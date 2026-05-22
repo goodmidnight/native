@@ -14,9 +14,11 @@ set(SOURCE_FILES
         ScannerWrapperJni.cpp
         ../core/ScannerEngine.cpp
         ../core/src/GeometryUtils.cpp
-    ../core/src/image_postprocessor.cpp
         ../core/src/ImagePreprocessor.cpp
         ../core/src/ImageUtils.cpp
+        ../core/src/ImageValidator.cpp
+        ../core/src/OcrProcessor.cpp
+        ../core/src/ScanProcessor.cpp
 )
 
 add_library(native-scanner SHARED ${SOURCE_FILES})

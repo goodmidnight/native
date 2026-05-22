@@ -1,5 +1,5 @@
 /**
- * @file scanner_wrapper_jni.cpp
+ * @file ScannerWrapperJni.cpp
  * @brief JNI Bridge connecting the Android Java/Kotlin environment with the C++ Scanner Engine.
  */
 
@@ -9,11 +9,11 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include "scanner_engine.hpp"
+#include "ScannerEngine.hpp"
 
 using namespace native_scanner;
 
-#define JNI_METHOD(METHOD_NAME) Java_io_goodmidnight_scanner_data_jni_NativeScanner_##METHOD_NAME
+#define JNI_METHOD(METHOD_NAME) Java_io_goodmidnight_scanner_jni_NativeScanner_##METHOD_NAME
 #define LOG_TAG "NativeScanner"
 
 // ============================================================================
@@ -231,7 +231,7 @@ JNI_METHOD(nativeDetect)(JNIEnv* env, jobject thiz, jlong ptr, jobject bitmap, j
     jfloatArray jpoints = env->NewFloatArray(8);
     if (frame.is_detected && frame.points.size() == 4) {
         float pts[8] = {
-                frame.points[0.x, frame.points[0].y,
+                frame.points[0].x, frame.points[0].y,
                 frame.points[1].x, frame.points[1].y,
                 frame.points[2].x, frame.points[2].y,
                 frame.points[3].x, frame.points[3].y
