@@ -137,10 +137,10 @@ namespace native_scanner {
                 return result;
             }
 
-            if (type == DocumentType::GENERAL || type == DocumentType::RECEIPT) {
-                if (warped.cols > warped.rows) cv::rotate(warped, warped, cv::ROTATE_90_CLOCKWISE);
-            } else if (type == DocumentType::ID_CARD || type == DocumentType::BUSINESS_CARD) {
-                if (warped.rows > warped.cols) cv::rotate(warped, warped, cv::ROTATE_90_CLOCKWISE);
+            bool srcIsPortrait = rotated_src.rows >= rotated_src.cols;
+            bool warpedIsPortrait = warped.rows >= warped.cols;
+            if (srcIsPortrait != warpedIsPortrait) {
+                cv::rotate(warped, warped, cv::ROTATE_90_CLOCKWISE);
             }
 
             cv::Mat gray_warped;
