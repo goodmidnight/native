@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.goodmidnight.scanner.core.save.DocumentSaveController.SaveFormat
 import io.goodmidnight.scanner.ui.core.utils.LocalSnackbarHostState
 import io.goodmidnight.scanner.ui.core.utils.showSnackbarImmediately
 import io.goodmidnight.scanner.ui.feature.camera.result.data.ResultEffect
@@ -48,17 +49,54 @@ fun ResultRoute(
     val coroutineScope: CoroutineScope = rememberCoroutineScope()
     val snackbarHostState: SnackbarHostState = LocalSnackbarHostState.current
 
-    val saveLauncher = rememberLauncherForActivityResult(
+    val saveJpegLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("image/jpeg")
+    ) { uri ->
+        uri?.let {
+            coroutineScope.launch(Dispatchers.IO) {
+                val bitmap = sharedState.captureResult?.image ?: return@launch
+                context.contentResolver.openOutputStream(it)?.use { outputStream ->
+                    val saveImage = viewModel.documentSaveController.saveImage(
+                        bitmap,
+                        outputStream,
+                        SaveFormat.JPEG
+                    )
+                    saveImage
+                }
+                withContext(Dispatchers.Main) {
+                    snackbarHostState.showSnackbarImmediately(coroutineScope, "이미지가 JPEG 파일로 저장되었습니다.")
+                }
+            }
+        }
+    }
+
+    val savePngLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("image/png")
     ) { uri ->
         uri?.let {
             coroutineScope.launch(Dispatchers.IO) {
                 val bitmap = sharedState.captureResult?.image ?: return@launch
                 context.contentResolver.openOutputStream(it)?.use { outputStream ->
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                    viewModel.documentSaveController.saveImage(bitmap, outputStream, SaveFormat.PNG)
                 }
                 withContext(Dispatchers.Main) {
-                    snackbarHostState.showSnackbarImmediately(coroutineScope, "이미지가 저장되었습니다.")
+                    snackbarHostState.showSnackbarImmediately(coroutineScope, "이미지가 PNG 파일로 저장되었습니다.")
+                }
+            }
+        }
+    }
+
+    val savePdfLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/pdf")
+    ) { uri ->
+        uri?.let {
+            coroutineScope.launch(Dispatchers.IO) {
+                val bitmap = sharedState.captureResult?.image ?: return@launch
+                context.contentResolver.openOutputStream(it)?.use { outputStream ->
+                    viewModel.documentSaveController.saveAsPdf(bitmap, outputStream, "scanned_doc")
+                }
+                withContext(Dispatchers.Main) {
+                    snackbarHostState.showSnackbarImmediately(coroutineScope, "문서가 PDF 파일로 저장되었습니다.")
                 }
             }
         }
@@ -82,7 +120,12 @@ fun ResultRoute(
                 }
 
                 is ResultEffect.SaveToFolder -> {
-                    saveLauncher.launch("scanned_${System.currentTimeMillis()}.png")
+                    val timestamp = System.currentTimeMillis()
+                    when (effect.format) {
+                        SaveFormat.JPEG -> saveJpegLauncher.launch("scanned_$timestamp.jpg")
+                        SaveFormat.PNG -> savePngLauncher.launch("scanned_$timestamp.png")
+                        SaveFormat.PDF -> savePdfLauncher.launch("scanned_$timestamp.pdf")
+                    }
                 }
             }
         }
@@ -95,7 +138,9 @@ fun ResultRoute(
         state = state,
         sharedState = sharedState,
         onBack = remember { { viewModel.onEvent(ResultEvent.OnBack) } },
-        onSave = remember { { bitmap -> viewModel.onEvent(ResultEvent.OnSaveToFolder(bitmap)) } },
+        onSave = remember { { bitmap -> viewModel.onEvent(ResultEvent.OnSaveClick(bitmap)) } },
+        onSelectFormat = remember { { format -> viewModel.onEvent(ResultEvent.OnSelectFormat(format)) } },
+        onDismissDialog = remember { { viewModel.onEvent(ResultEvent.OnDismissDialog) } },
         onShare = remember { { bitmap -> viewModel.onEvent(ResultEvent.OnShare(bitmap)) } },
         onTextCopy = remember { { viewModel.onEvent(ResultEvent.OnTextCopy) } }
     )

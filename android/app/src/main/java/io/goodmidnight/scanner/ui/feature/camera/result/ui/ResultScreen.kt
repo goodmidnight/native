@@ -42,7 +42,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import io.goodmidnight.scanner.core.save.DocumentSaveController.SaveFormat
 import io.goodmidnight.scanner.designsystem.component.SBodyMediumText
+import io.goodmidnight.scanner.designsystem.component.SButton
+import io.goodmidnight.scanner.designsystem.component.SButtonType
+import io.goodmidnight.scanner.designsystem.component.SDialog
 import io.goodmidnight.scanner.designsystem.component.STitleMediumText
 import io.goodmidnight.scanner.designsystem.preview.ComponentPreview
 import io.goodmidnight.scanner.designsystem.theme.Theme
@@ -59,6 +63,8 @@ fun ResultScreen(
     sharedState: SharedState,
     onBack: () -> Unit,
     onSave: (Bitmap) -> Unit,
+    onSelectFormat: (SaveFormat) -> Unit,
+    onDismissDialog: () -> Unit,
     onShare: (Bitmap) -> Unit,
     onTextCopy: () -> Unit
 ) {
@@ -197,6 +203,49 @@ fun ResultScreen(
                 }
             }
         }
+        if (state.showFormatDialog) {
+            SDialog(onDismissRequest = onDismissDialog) {
+                STitleMediumText(
+                    text = "저장 형식 선택",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                SBodyMediumText(
+                    text = "스캔한 문서를 저장할 포맷을 선택해 주세요.",
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Theme.colorScheme.secondaryText,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    SButton(
+                        text = "JPEG 이미지로 저장",
+                        onClick = { onSelectFormat(SaveFormat.JPEG) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    SButton(
+                        text = "PNG 이미지로 저장",
+                        onClick = { onSelectFormat(SaveFormat.PNG) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    SButton(
+                        text = "PDF 문서로 저장",
+                        onClick = { onSelectFormat(SaveFormat.PDF) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    SButton(
+                        text = "취소",
+                        onClick = onDismissDialog,
+                        type = SButtonType.SECONDARY,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -238,6 +287,8 @@ fun SResultScreenPreview() {
                 sharedState = SharedState(),
                 onBack = {},
                 onSave = {},
+                onSelectFormat = {},
+                onDismissDialog = {},
                 onShare = {},
                 onTextCopy = {}
             )
