@@ -42,7 +42,8 @@ namespace native_scanner {
             dst,
             current_config.canny_sigma,
             current_config.blur_kernel_size,
-            current_config.low_light_mode
+            current_config.low_light_mode,
+            type
         );
 
         if (type == DocumentType::RECEIPT) {
@@ -51,7 +52,7 @@ namespace native_scanner {
             current_config.min_area_ratio = 0.1;
         }
 
-        DocumentFrame frame = GeometryUtils::findLargestArea(dst, current_config.min_area_ratio);
+        DocumentFrame frame = GeometryUtils::findLargestArea(dst, current_config.min_area_ratio, type);
 
         if (frame.is_detected) {
             if (logger_) logger_(LogLevel::DEBUG, "Document detected with confidence: " + std::to_string(frame.confidence));
@@ -62,13 +63,13 @@ namespace native_scanner {
                     max_distance = std::max(max_distance, dist);
                 }
 
-                if (max_distance < 15.0f) {
+                if (max_distance < 25.0f) { // 안정성 검사 임계값 상향
                     stable_frame_count_++;
                 } else {
                     stable_frame_count_ = 0;
                 }
 
-                if (stable_frame_count_ >= 3) {
+                if (stable_frame_count_ >= 2) { // 안정성 카운트 조건 완화
                     frame.is_stable = true;
                     if (logger_) logger_(LogLevel::DEBUG, "Frame is stable.");
                 }
@@ -76,7 +77,7 @@ namespace native_scanner {
                 stable_frame_count_ = 0;
             }
 
-            frame.points = GeometryUtils::smoothPoints(prev_points_, frame.points, 0.3f);
+            frame.points = GeometryUtils::smoothPoints(prev_points_, frame.points, 0.5f); // 스무딩 팩터 증가
             prev_points_ = frame.points;
 
             float inv_scale = 1.0f / scale;

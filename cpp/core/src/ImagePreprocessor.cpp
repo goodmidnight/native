@@ -65,17 +65,18 @@ namespace native_scanner {
 
         // 2. Calculate dynamic thresholds for Canny Edge Detection.
         // Lower bound is (1 - sigma)% of median, Upper bound is (1 + sigma)% of median.
-        int low_thresh = static_cast<int>(std::max(0.0, (1.0 - sigma) * median));
-        int high_thresh = static_cast<int>(std::min(255.0, (1.0 + sigma) * median));
+        double low_thresh = std::max(0.0, (1.0 - sigma) * median);
+        double high_thresh = std::min(255.0, (1.0 + sigma) * median);
 
         cv::Canny(src, dst, low_thresh, high_thresh);
     }
 
-    void ImagePreprocessor::preprocess(const cv::Mat &src, cv::Mat &dst, float canny_sigma, int custom_blur_size, bool low_light_mode) {
+    void ImagePreprocessor::preprocess(const cv::Mat &src, cv::Mat &dst, float canny_sigma, int custom_blur_size, bool low_light_mode, DocumentType type) {
         cv::Mat gray;
+        bool applied_low_light = low_light_mode;
+
         if (src.channels() == 3 || src.channels() == 4) {
-            // 저대비 환경인지 판단하여 CLAHE를 동적으로 적용합니다.
-            if (low_light_mode) {
+            if (applied_low_light) {
                 cv::Mat enhanced;
                 applyLowLightEnhancement(src, enhanced);
                 cv::cvtColor(enhanced, gray, cv::COLOR_BGR2GRAY);
@@ -86,35 +87,72 @@ namespace native_scanner {
             gray = src.clone();
         }
 
-        // 1. 샤프닝(Sharpening) 커널 적용
-        // 중심 픽셀 가중치를 높여 흐릿한 테두리의 명암 대비를 강제로 증폭시킵니다.
-        cv::Mat sharpening_kernel = (cv::Mat_<float>(3, 3) <<
-            0, -1, 0,
-           -1,  5, -1,
-            0, -1, 0);
+        // 1. 자동 저조도 감지 로직
+        double avg_brightness = cv::mean(gray)[0];
+        if (!applied_low_light && avg_brightness < 80.0) {
+            applied_low_light = true;
+            if (src.channels() == 3 || src.channels() == 4) {
+                cv::Mat enhanced;
+                applyLowLightEnhancement(src, enhanced);
+                cv::cvtColor(enhanced, gray, cv::COLOR_BGR2GRAY);
+            }
+            // 어두운 환경이므로 Canny 에지 검출 감도를 높이기 위해 canny_sigma 임계값 간격을 다이내믹하게 보정
+            canny_sigma *= 0.75f;
+        }
+
+        // 2. 문서 유형별 샤프닝(Sharpening) 필터 커스터마이징
+        cv::Mat sharpening_kernel;
+        if (type == DocumentType::ID_CARD || type == DocumentType::BUSINESS_CARD) {
+            // 신분증이나 명함은 작은 텍스트와 세밀한 경계선 대비가 더 중요하므로 샤프닝을 다소 강화
+            sharpening_kernel = (cv::Mat_<float>(3, 3) <<
+                 0, -1.2f,  0,
+              -1.2f,  5.8f, -1.2f,
+                 0, -1.2f,  0);
+        } else {
+            // 일반 문서 및 영수증 표준 샤프닝
+            sharpening_kernel = (cv::Mat_<float>(3, 3) <<
+                 0, -1.f,  0,
+                -1.f,  5.f, -1.f,
+                 0, -1.f,  0);
+        }
         cv::filter2D(gray, gray, gray.depth(), sharpening_kernel);
 
-        // 2. 동적 블러(Blur) 생략 로직 (라플라시안 분산 활용)
+        // 3. 동적 블러(Blur) 생략/조율 임계값 커스터마이징
         cv::Mat laplacian, mean, stddev;
         cv::Laplacian(gray, laplacian, CV_64F);
         cv::meanStdDev(laplacian, mean, stddev);
         double variance = stddev.at<double>(0) * stddev.at<double>(0);
 
         cv::Mat blurred;
-        if (variance > 150.0) {
+        double blur_threshold = 150.0;
+        if (type == DocumentType::ID_CARD || type == DocumentType::BUSINESS_CARD) {
+            // 신분증의 정교한 에지가 번지는 것을 적극 방지하기 위해 블러 적용 기준을 다소 높여 제한적으로 블러링 적용
+            blur_threshold = 220.0;
+        }
+
+        if (variance > blur_threshold) {
             // 충분히 선명할 때만 노이즈 제거용 블러 적용
-            applyDynamicBlur(gray, blurred, custom_blur_size);
+            int k_size = custom_blur_size;
+            if ((type == DocumentType::ID_CARD || type == DocumentType::BUSINESS_CARD) && k_size <= 0) {
+                k_size = (gray.cols / 300) | 1;
+            }
+            applyDynamicBlur(gray, blurred, k_size);
         } else {
             // 흐릿한 경우 블러 연산을 건너뛰어 추가 픽셀 손실 방지
             blurred = gray;
         }
 
-        // 3. 고도화된 Adaptive Canny 알고리즘 적용
+        // 4. 고도화된 Adaptive Canny 알고리즘 적용
         applyAdaptiveCanny(blurred, dst, canny_sigma);
 
-        // 4. 모폴로지 닫기(Close) 연산
-        // 노이즈나 빛 반사로 인해 점선처럼 끊어진 테두리를 하나의 실선 덩어리로 묶어줍니다.
-        cv::Mat morph_kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+        // 5. 문서 유형별 모폴로지 닫기(Close) 커널 크기 조율
+        int morph_size = 5;
+        if (type == DocumentType::RECEIPT) {
+            // 영수증은 빽빽한 텍스트 및 용지 주름 등으로 인해 엣지가 파편화되기 쉬우므로 7x7로 상향하여 엣지 연결성 강화
+            morph_size = 7;
+        }
+
+        cv::Mat morph_kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(morph_size, morph_size));
         cv::morphologyEx(dst, dst, cv::MORPH_CLOSE, morph_kernel);
     }
 
