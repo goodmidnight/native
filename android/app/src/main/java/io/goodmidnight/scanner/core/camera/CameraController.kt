@@ -6,12 +6,18 @@ import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.graphics.PixelFormat
+import android.util.Size
+import android.view.OrientationEventListener
+import android.view.Surface
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
@@ -35,10 +41,13 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.inject.Inject
+import javax.inject.Singleton
+
 
 /**
  * Handles camera lifecycle, use case binding (Preview, Analysis, Capture), and image processing.
  */
+@Singleton
 class CameraController @Inject constructor(
     @ApplicationContext private val context: Context,
     private val cameraProviderFuture: ListenableFuture<ProcessCameraProvider>,
@@ -58,12 +67,17 @@ class CameraController @Inject constructor(
     val cameraSideEffect = _cameraSideEffect.asSharedFlow()
 
     private var cameraProvider: ProcessCameraProvider? = null
+    private var camera: Camera? = null
     private var imageCapture: ImageCapture? = null
+    private var imageAnalysis: ImageAnalysis? = null
 
     private val cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 
     private var currentPreviewView: PreviewView? = null
     private var currentLifecycleOwner: LifecycleOwner? = null
+
+    private var orientationEventListener: OrientationEventListener? = null
+    private var currentRotation: Int = Surface.ROTATION_0
 
     init {
         observeEvents()
@@ -92,6 +106,8 @@ class CameraController @Inject constructor(
         currentLifecycleOwner = lifecycleOwner
         currentPreviewView = previewView
 
+        startOrientationTracking()
+
         cameraProviderFuture.addListener({
             try {
                 cameraProvider = cameraProviderFuture.get()
@@ -108,16 +124,27 @@ class CameraController @Inject constructor(
         val viewFinder = currentPreviewView ?: return
         val provider = cameraProvider ?: return
 
-        val preview = Preview.Builder().build().also {
-            it.setSurfaceProvider(viewFinder.surfaceProvider)
-        }
+        val resolutionSelector = ResolutionSelector.Builder()
+            .setResolutionStrategy(
+                ResolutionStrategy(
+                    Size(1920, 1080),
+                    ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+                )
+            )
+            .build()
 
-        val imageAnalysis = ImageAnalysis.Builder()
+        val preview = Preview.Builder()
+            .setResolutionSelector(resolutionSelector)
+            .build().also {
+                it.setSurfaceProvider(viewFinder.surfaceProvider)
+            }
+
+        val analysis = ImageAnalysis.Builder()
             .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .build()
-            .also { analysis ->
-                analysis.setAnalyzer(cameraExecutor) { imageProxy ->
+            .also { analysisUseCase ->
+                analysisUseCase.setAnalyzer(cameraExecutor) { imageProxy ->
                     val rotation = imageProxy.imageInfo.rotationDegrees
                     val bitmap = imageProxyToBitmap(imageProxy)
                     scope.launch {
@@ -126,23 +153,86 @@ class CameraController @Inject constructor(
                     imageProxy.close()
                 }
             }
+        imageAnalysis = analysis
+
+        val highResSelector = ResolutionSelector.Builder()
+            .setResolutionStrategy(ResolutionStrategy.HIGHEST_AVAILABLE_STRATEGY)
+            .build()
 
         imageCapture = ImageCapture.Builder()
             .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+            .setResolutionSelector(highResSelector)
             .build()
 
         try {
             provider.unbindAll()
-            provider.bindToLifecycle(
+            val boundCamera = provider.bindToLifecycle(
                 owner,
                 CameraSelector.DEFAULT_BACK_CAMERA,
                 preview,
-                imageAnalysis,
+                analysis,
                 imageCapture
             )
+            camera = boundCamera
+
+            enableAutoFocus()
+
+            boundCamera.cameraInfo.zoomState.observe(owner) { zoomState ->
+                _cameraState.update {
+                    it.copy(
+                        zoomRatio = zoomState.zoomRatio,
+                        zoomRatioRange = zoomState.minZoomRatio..zoomState.maxZoomRatio
+                    )
+                }
+            }
         } catch (exc: Exception) {
             scope.launch { _cameraSideEffect.emit(CameraEffect.SendCameraError(exc)) }
         }
+    }
+
+    private fun enableAutoFocus() {
+        val cam = camera ?: return
+        cam.cameraControl.cancelFocusAndMetering()
+    }
+
+    private fun startOrientationTracking() {
+        if (orientationEventListener == null) {
+            orientationEventListener = object : OrientationEventListener(context) {
+                override fun onOrientationChanged(orientation: Int) {
+                    if (orientation == ORIENTATION_UNKNOWN) return
+                    val newRotation = when (orientation) {
+                        in 45 until 135 -> Surface.ROTATION_270
+                        in 135 until 225 -> Surface.ROTATION_180
+                        in 225 until 315 -> Surface.ROTATION_90
+                        else -> Surface.ROTATION_0
+                    }
+                    if (newRotation != currentRotation) {
+                        currentRotation = newRotation
+                        updateUseCasesRotation(newRotation)
+                    }
+                }
+            }
+        }
+        orientationEventListener?.enable()
+    }
+
+    private fun stopOrientationTracking() {
+        orientationEventListener?.disable()
+        orientationEventListener = null
+    }
+
+    private fun updateUseCasesRotation(rotation: Int) {
+        imageCapture?.targetRotation = rotation
+        imageAnalysis?.targetRotation = rotation
+    }
+
+    fun setZoomRatio(zoomRatio: Float) {
+        camera?.cameraControl?.setZoomRatio(zoomRatio)
+    }
+
+    fun setTorchEnabled(enabled: Boolean) {
+        camera?.cameraControl?.enableTorch(enabled)
+        _cameraState.update { it.copy(isTorchEnabled = enabled) }
     }
 
     private fun handleTakePicture(processingMode: Int) {
@@ -185,6 +275,7 @@ class CameraController @Inject constructor(
     }
 
     private fun handleShutdown() {
+        stopOrientationTracking()
         cameraProvider?.unbindAll()
         currentPreviewView = null
         currentLifecycleOwner = null

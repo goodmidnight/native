@@ -14,5 +14,8 @@ data class CameraState(
      * True if the camera is currently in the process of capturing a high-resolution image.
      * Can be used to disable the shutter button or show a capturing overlay.
      */
-    val isCapturing: Boolean = false
+    val isCapturing: Boolean = false,
+    val zoomRatio: Float = 1.0f,
+    val zoomRatioRange: ClosedFloatingPointRange<Float> = 1.0f..1.0f,
+    val isTorchEnabled: Boolean = false
 )
