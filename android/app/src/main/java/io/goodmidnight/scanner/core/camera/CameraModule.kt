@@ -1,4 +1,4 @@
-package io.goodmidnight.scanner.camera
+package io.goodmidnight.scanner.core.camera
 
 import android.content.Context
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -8,8 +8,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.goodmidnight.scanner.data.jni.NativeScanner
-import io.goodmidnight.scanner.domain.model.ScannerConfig
 import javax.inject.Singleton
 
 @Module
@@ -22,13 +20,5 @@ object CameraModule {
         @ApplicationContext context: Context
     ): ListenableFuture<ProcessCameraProvider> {
         return ProcessCameraProvider.getInstance(context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideNativeScanner(): NativeScanner {
-        val scanner = NativeScanner()
-        scanner.initEngine(ScannerConfig(targetWidth = 800))
-        return scanner
     }
 }

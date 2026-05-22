@@ -1,4 +1,4 @@
-package io.goodmidnight.scanner.camera
+package io.goodmidnight.scanner.core.camera
 
 /**
  * Data class representing the current UI state of the camera.

@@ -1,4 +1,4 @@
-package io.goodmidnight.scanner.camera
+package io.goodmidnight.scanner.core.camera
 
 import android.graphics.Bitmap
 

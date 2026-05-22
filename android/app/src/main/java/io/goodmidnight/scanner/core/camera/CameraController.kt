@@ -1,19 +1,17 @@
-package io.goodmidnight.scanner.camera
+package io.goodmidnight.scanner.core.camera
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
+import android.graphics.Matrix
 import android.graphics.PixelFormat
-import android.util.Size
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
-import androidx.camera.core.SurfaceOrientedMeteringPointFactory
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
@@ -34,7 +32,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.nio.ByteBuffer
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.inject.Inject
@@ -49,24 +46,20 @@ class CameraController @Inject constructor(
     private val scope =
         CoroutineScope(SupervisorJob() + Dispatchers.Main + CoroutineName("CameraController"))
 
-    // State flow representing the current camera status
     private val _cameraState = MutableStateFlow(CameraState())
     val cameraState: StateFlow<CameraState> = _cameraState.asStateFlow()
 
-    // Channel for incoming camera events to ensure sequential processing
     private val _cameraEvent = Channel<CameraEvent>(
         capacity = Channel.BUFFERED,
         onBufferOverflow = BufferOverflow.DROP_LATEST
     )
 
-    // Shared flow for emitting one-time side effects like errors or frames
     private val _cameraSideEffect = MutableSharedFlow<CameraEffect>()
     val cameraSideEffect = _cameraSideEffect.asSharedFlow()
 
     private var cameraProvider: ProcessCameraProvider? = null
     private var imageCapture: ImageCapture? = null
 
-    // Dedicated executor for image analysis to avoid blocking the main thread
     private val cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 
     private var currentPreviewView: PreviewView? = null
@@ -76,18 +69,10 @@ class CameraController @Inject constructor(
         observeEvents()
     }
 
-    /**
-     * [processEvent]
-     * - Entry point for processing camera-related actions.
-     */
     fun processEvent(event: CameraEvent) {
         _cameraEvent.trySend(event)
     }
 
-    /**
-     * [observeEvents]
-     * - Collects and handles events from the internal event channel.
-     */
     private fun observeEvents() {
         scope.launch {
             _cameraEvent.receiveAsFlow().collect { event ->
@@ -96,7 +81,6 @@ class CameraController @Inject constructor(
                         event.lifecycleOwner,
                         event.previewView
                     )
-
                     is CameraEvent.TakePicture -> handleTakePicture(event.processingMode)
                     is CameraEvent.Shutdown -> handleShutdown()
                 }
@@ -104,10 +88,6 @@ class CameraController @Inject constructor(
         }
     }
 
-    /**
-     * [handleStartCamera]
-     * - Initializes the CameraProvider and triggers use case binding.
-     */
     private fun handleStartCamera(lifecycleOwner: LifecycleOwner, previewView: PreviewView) {
         currentLifecycleOwner = lifecycleOwner
         currentPreviewView = previewView
@@ -123,10 +103,6 @@ class CameraController @Inject constructor(
         }, ContextCompat.getMainExecutor(context))
     }
 
-    /**
-     * [bindCameraUseCases]
-     * - Binds Preview, ImageAnalysis, and ImageCapture use cases to the lifecycle.
-     */
     private fun bindCameraUseCases() {
         val owner = currentLifecycleOwner ?: return
         val viewFinder = currentPreviewView ?: return
@@ -144,7 +120,6 @@ class CameraController @Inject constructor(
                 analysis.setAnalyzer(cameraExecutor) { imageProxy ->
                     val rotation = imageProxy.imageInfo.rotationDegrees
                     val bitmap = imageProxyToBitmap(imageProxy)
-
                     scope.launch {
                         _cameraSideEffect.emit(CameraEffect.SendPreviewFrame(bitmap, rotation))
                     }
@@ -170,14 +145,8 @@ class CameraController @Inject constructor(
         }
     }
 
-    /**
-     * [handleTakePicture]
-     * - Captures a high-resolution image and processes it.
-     */
     private fun handleTakePicture(processingMode: Int) {
         val capture = imageCapture ?: return
-        currentPreviewView ?: return
-
         _cameraState.update { it.copy(isCapturing = true) }
 
         capture.takePicture(
@@ -186,12 +155,19 @@ class CameraController @Inject constructor(
                 override fun onCaptureSuccess(image: ImageProxy) {
                     val rotation = image.imageInfo.rotationDegrees
                     val bitmap = imageProxyToBitmap(image)
+                    
+                    // 회전 정보를 바탕으로 비트맵을 물리적으로 회전시킴
+                    val rotatedBitmap = if (rotation != 0) {
+                        rotateBitmap(bitmap, rotation.toFloat())
+                    } else {
+                        bitmap
+                    }
 
                     scope.launch {
                         _cameraSideEffect.emit(
                             CameraEffect.SendCapturedImage(
-                                bitmap,
-                                rotation,
+                                rotatedBitmap,
+                                0, // 이미 회전됨
                                 processingMode,
                             )
                         )
@@ -208,29 +184,17 @@ class CameraController @Inject constructor(
         )
     }
 
-    /**
-     * [handleShutdown]
-     * Unbinds camera use cases and clears references.
-     */
     private fun handleShutdown() {
         cameraProvider?.unbindAll()
         currentPreviewView = null
         currentLifecycleOwner = null
     }
 
-    /**
-     * [imageProxyToBitmap]
-     * - Converts an ImageProxy to a Bitmap based on its pixel format.
-     *  1. Processing real-time raw pixels (RGBA_8888) from ImageAnalysis
-     *  2. Processing high-resolution compressed photo (JPEG) from ImageCapture
-     */
     private fun imageProxyToBitmap(image: ImageProxy): Bitmap {
         return when (image.format) {
-            //
             PixelFormat.RGBA_8888 -> {
                 val buffer = image.planes[0].buffer
                 buffer.rewind()
-
                 val bitmap = Bitmap.createBitmap(image.width, image.height, Bitmap.Config.ARGB_8888)
                 bitmap.copyPixelsFromBuffer(buffer)
                 bitmap
@@ -238,16 +202,17 @@ class CameraController @Inject constructor(
             ImageFormat.JPEG -> {
                 val buffer = image.planes[0].buffer
                 buffer.rewind()
-
                 val bytes = ByteArray(buffer.remaining())
                 buffer.get(bytes)
-
                 BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                     ?: throw IllegalArgumentException("Failed to decode JPEG.")
             }
-            else -> {
-                throw IllegalArgumentException("Unsupported image format: ${image.format}")
-            }
+            else -> throw IllegalArgumentException("Unsupported image format: ${image.format}")
         }
+    }
+
+    private fun rotateBitmap(bitmap: Bitmap, degrees: Float): Bitmap {
+        val matrix = Matrix().apply { postRotate(degrees) }
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 }
