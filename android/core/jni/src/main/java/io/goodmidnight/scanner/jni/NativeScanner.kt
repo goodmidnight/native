@@ -1,16 +1,17 @@
-package io.goodmidnight.scanner.data.jni
+package io.goodmidnight.scanner.jni
 
 import android.graphics.Bitmap
-import io.goodmidnight.scanner.domain.model.CaptureResult
-import io.goodmidnight.scanner.domain.model.DocumentFrame
-import io.goodmidnight.scanner.domain.model.ScannerConfig
+import io.goodmidnight.scanner.data.datasource.ScannerDataSource
+import io.goodmidnight.scanner.model.CaptureResult
+import io.goodmidnight.scanner.model.DocumentFrame
+import io.goodmidnight.scanner.model.ScannerConfig
 
 /**
  * JNI Wrapper class for the native C++ Scanner Engine.
  * This class manages the lifecycle of the native engine and provides an interface
  * for document detection and high-quality capture using OpenCV.
  */
-class NativeScanner {
+class NativeScanner : ScannerDataSource {
     /**
      * Pointer to the native C++ object (ScannerEngine).
      * This address is managed by the native layer and should not be modified manually.
@@ -26,7 +27,7 @@ class NativeScanner {
      * Initializes the native engine with the given configuration.
      * @param config Configuration parameters like target width and algorithm thresholds.
      */
-    fun initEngine(config: ScannerConfig) {
+    override fun initEngine(config: ScannerConfig) {
         if (nativePtr == 0L) {
             nativePtr = nativeInit(config)
         }
@@ -36,7 +37,7 @@ class NativeScanner {
      * Updates the configuration of the already initialized native engine.
      * @param config New configuration parameters to be applied.
      */
-    fun updateConfig(config: ScannerConfig) {
+    override fun updateConfig(config: ScannerConfig) {
         if (nativePtr != 0L) nativeUpdateConfig(nativePtr, config)
     }
 
@@ -47,7 +48,11 @@ class NativeScanner {
      * @param rotationDegrees Rotation of the bitmap in degrees.
      * @return [DocumentFrame] containing the detected corners and confidence, or null if engine not ready.
      */
-    fun detect(previewBitmap: Bitmap, documentType: Int, rotationDegrees: Int): DocumentFrame? {
+    override fun detect(
+        previewBitmap: Bitmap,
+        documentType: Int,
+        rotationDegrees: Int,
+    ): DocumentFrame? {
         if (nativePtr == 0L) return null
         return nativeDetect(nativePtr, previewBitmap, documentType, rotationDegrees)
     }
@@ -63,24 +68,33 @@ class NativeScanner {
      * @param rotationDegrees Rotation of the source bitmap.
      * @return [CaptureResult] containing the warped image and status flags.
      */
-    fun capture(
+    override fun capture(
         srcBitmap: Bitmap,
         frame: DocumentFrame,
         previewWidth: Int,
         previewHeight: Int,
         processingMode: Int,
         documentType: Int,
-        rotationDegrees: Int
+        rotationDegrees: Int,
     ): CaptureResult? {
         if (nativePtr == 0L) return null
-        return nativeCapture(nativePtr, srcBitmap, frame, previewWidth, previewHeight, processingMode, documentType, rotationDegrees)
+        return nativeCapture(
+            nativePtr,
+            srcBitmap,
+            frame,
+            previewWidth,
+            previewHeight,
+            processingMode,
+            documentType,
+            rotationDegrees
+        )
     }
 
     /**
      * Releases the native engine and frees memory on the C++ heap.
      * Should be called when the scanner is no longer needed to prevent memory leaks.
      */
-    fun release() {
+    override fun release() {
         if (nativePtr != 0L) {
             nativeRelease(nativePtr)
             nativePtr = 0L
@@ -90,7 +104,23 @@ class NativeScanner {
     // --- JNI External Methods (implemented in C++) ---
     private external fun nativeInit(config: ScannerConfig): Long
     private external fun nativeUpdateConfig(ptr: Long, config: ScannerConfig)
-    private external fun nativeDetect(ptr: Long, bitmap: Bitmap, type: Int, rotation: Int): DocumentFrame
-    private external fun nativeCapture(ptr: Long, bitmap: Bitmap, frame: DocumentFrame, pWidth: Int, pHeight: Int, mode: Int, type: Int, rotation: Int): CaptureResult
+    private external fun nativeDetect(
+        ptr: Long,
+        bitmap: Bitmap,
+        type: Int,
+        rotation: Int,
+    ): DocumentFrame
+
+    private external fun nativeCapture(
+        ptr: Long,
+        bitmap: Bitmap,
+        frame: DocumentFrame,
+        pWidth: Int,
+        pHeight: Int,
+        mode: Int,
+        type: Int,
+        rotation: Int,
+    ): CaptureResult
+
     private external fun nativeRelease(ptr: Long)
 }
