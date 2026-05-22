@@ -45,8 +45,8 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
 
     // [수정 포인트 1] 실제 코틀린 클래스가 존재하는 정확한 패키지 경로로 변경해야 합니다.
     // 만약 domain.model 패키지에 있다면 아래와 같이 적어야 합니다. (슬래시 / 로 구분)
-    const char* frameClassName = "io/goodmidnight/scanner/domain/model/DocumentFrame";
-    const char* resultClassName = "io/goodmidnight/scanner/domain/model/CaptureResult";
+    const char* frameClassName = "io/goodmidnight/scanner/model/DocumentFrame";
+    const char* resultClassName = "io/goodmidnight/scanner/model/CaptureResult";
 
     // 1. DocumentFrame 캐싱 및 방어 로직
     jclass localFrameCls = env->FindClass(frameClassName);
