@@ -4,11 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import io.goodmidnight.scanner.designsystem.component.SScaffold
 import io.goodmidnight.scanner.designsystem.component.STitleTopBar
 import io.goodmidnight.scanner.designsystem.preview.ComponentPreview
 import io.goodmidnight.scanner.designsystem.theme.Theme
@@ -33,7 +33,8 @@ fun SettingsScreen(
     onOpenSourceLicensesClicked: () -> Unit,
     onPrivacyPolicyClicked: () -> Unit,
 ) {
-    Scaffold(
+    SScaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             STitleTopBar(
                 title = "Settings",
