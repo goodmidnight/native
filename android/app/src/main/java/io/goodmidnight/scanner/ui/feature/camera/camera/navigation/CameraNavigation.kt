@@ -4,6 +4,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import io.goodmidnight.scanner.core.utils.findActivity
 import io.goodmidnight.scanner.ui.core.navigation.MainGraph
 import io.goodmidnight.scanner.ui.core.navigation.sharedViewModel
 import io.goodmidnight.scanner.ui.feature.camera.shared.SharedViewModel
@@ -13,7 +14,11 @@ fun NavGraphBuilder.cameraScreen(
     navController: NavController,
     route: String,
 ) {
-    val popBackStack: () -> Unit = { navController.popBackStack() }
+    val popBackStack: () -> Unit = {
+        if (!navController.popBackStack()) {
+            navController.context.findActivity()?.finish()
+        }
+    }
     val navigateToResult: () -> Unit = {
         navController.navigate(MainGraph.Scan.Result.buildNavigationRoute())
     }

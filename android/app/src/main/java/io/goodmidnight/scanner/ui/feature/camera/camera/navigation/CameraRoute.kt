@@ -5,6 +5,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -40,7 +41,7 @@ fun CameraRoute(
     val snackbarHostState: SnackbarHostState = LocalSnackbarHostState.current
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
 
-    var shutterTriggerTime by remember { mutableStateOf(0L) }
+    var shutterTriggerTime by remember { mutableLongStateOf(0L) }
 
     LaunchedEffect(sharedState.currentStep) {
         if (sharedState.currentStep == SharedState.ScannerStep.CAPTURING) {
@@ -90,7 +91,6 @@ fun CameraRoute(
         state = state,
         sharedState = sharedState,
         shutterTriggerTime = shutterTriggerTime,
-        onBack = remember { { viewModel.onEvent(CameraEvent.OnBack) } },
         onInitCamera = remember {
             { lifecycleOwner, previewView ->
                 sharedViewModel.onEvent(SharedEvent.OnInitCamera(lifecycleOwner, previewView))

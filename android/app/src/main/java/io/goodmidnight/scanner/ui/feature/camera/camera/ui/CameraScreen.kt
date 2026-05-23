@@ -26,37 +26,34 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import io.goodmidnight.scanner.R
+import androidx.compose.foundation.gestures.detectTransformGestures
 import io.goodmidnight.scanner.designsystem.component.SBodyMediumText
+import io.goodmidnight.scanner.designsystem.component.SCircularProgress
+import io.goodmidnight.scanner.designsystem.component.SIcon
 import io.goodmidnight.scanner.designsystem.component.SLabelMediumText
+import io.goodmidnight.scanner.designsystem.component.SScaffold
+import io.goodmidnight.scanner.designsystem.modifier.bounceClick
 import io.goodmidnight.scanner.designsystem.preview.ComponentPreview
 import io.goodmidnight.scanner.designsystem.theme.Theme
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.ui.input.pointer.pointerInput
 import io.goodmidnight.scanner.ui.core.utils.LocalSnackbarHostState
 import io.goodmidnight.scanner.ui.feature.camera.camera.data.CameraState
 import io.goodmidnight.scanner.ui.feature.camera.camera.ui.component.CaptureButton
@@ -64,14 +61,13 @@ import io.goodmidnight.scanner.ui.feature.camera.camera.ui.component.DocumentOve
 import io.goodmidnight.scanner.ui.feature.camera.camera.ui.component.SwipeableModeSelector
 import io.goodmidnight.scanner.ui.feature.camera.shared.SharedState
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CameraScreen(
     modifier: Modifier = Modifier,
     state: CameraState,
     sharedState: SharedState,
     shutterTriggerTime: Long = 0L,
-    onBack: () -> Unit,
     onInitCamera: (LifecycleOwner, PreviewView) -> Unit,
     onTakePicture: () -> Unit,
     onChangeDocumentType: (SharedState.DocumentType) -> Unit,
@@ -108,7 +104,7 @@ fun CameraScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(Theme.colorScheme.background)
     ) {
         AnimatedContent(
             targetState = sharedState.currentStep,
@@ -140,7 +136,7 @@ fun CameraScreen(
             label = "CameraStepTransition"
         ) { step ->
             when (step) {
-                SharedState.ScannerStep.CAPTURING -> ProcessingScreen()
+                SharedState.ScannerStep.CAPTURING -> ProcessingOverlay()
                 else -> CameraPreviewAndControls(
                     state = state,
                     sharedState = sharedState,
@@ -155,7 +151,6 @@ fun CameraScreen(
                     onZoomRatioChanged = onZoomRatioChanged,
                     onToggleTorch = onToggleTorch,
                     onToggleGridLines = onToggleGridLines,
-                    onBack = onBack,
                     onNavigateToSettings = onNavigateToSettings,
                 )
             }
@@ -164,7 +159,7 @@ fun CameraScreen(
 }
 
 @Composable
-private fun ProcessingScreen() {
+private fun ProcessingOverlay() {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -172,23 +167,23 @@ private fun ProcessingScreen() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CircularProgressIndicator(
+        SCircularProgress(
             modifier = Modifier.size(48.dp),
-            color = Theme.colorScheme.primary,
+            color = Theme.colorScheme.accent,
             strokeWidth = 4.dp
         )
         Spacer(modifier = Modifier.height(24.dp))
 
         SBodyMediumText(
             text = "Analyzing Document...",
-            color = Theme.colorScheme.onBackground
+            color = Theme.colorScheme.primaryText
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         SLabelMediumText(
             text = "Please hold still while we enhance the image",
-            color = Theme.colorScheme.onBackground.copy(alpha = 0.6f)
+            color = Theme.colorScheme.secondaryText
         )
     }
 }
@@ -209,7 +204,6 @@ private fun CameraPreviewAndControls(
     onZoomRatioChanged: (Float) -> Unit,
     onToggleTorch: () -> Unit,
     onToggleGridLines: () -> Unit,
-    onBack: () -> Unit,
     onNavigateToSettings: () -> Unit,
 ) {
     var flashOpacity by remember { mutableStateOf(0f) }
@@ -264,77 +258,28 @@ private fun CameraPreviewAndControls(
             GridOverlay()
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .systemBarsPadding()
+        SScaffold(
+            modifier = Modifier.fillMaxSize(),
+            backgroundColor = Color.Transparent,
+            topBar = {
+                CameraHeaderActions(
+                    isGridEnabled = state.showGridLines,
+                    isTorchEnabled = state.isTorchEnabled,
+                    onToggleGridLines = onToggleGridLines,
+                    onToggleTorch = onToggleTorch,
+                    onNavigateToSettings = onNavigateToSettings
+                )
+            },
+            bottomBar = {
+                CameraFooterControls(
+                    docPagerState = docPagerState,
+                    procPagerState = procPagerState,
+                    docTypes = docTypes,
+                    procModes = procModes,
+                    onTakePicture = onTakePicture
+                )
+            }
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = io.goodmidnight.scanner.designsystem.theme.Icons.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.White
-                    )
-                }
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onToggleGridLines) {
-                        Icon(
-                            imageVector = io.goodmidnight.scanner.designsystem.theme.Icons.Grid3x3,
-                            contentDescription = "Toggle Grid Lines",
-                            tint = if (state.showGridLines) Theme.colorScheme.primary else Color.White
-                        )
-                    }
-
-                    IconButton(onClick = onToggleTorch) {
-                        Icon(
-                            imageVector = if (state.isTorchEnabled) io.goodmidnight.scanner.designsystem.theme.Icons.FlashOn else io.goodmidnight.scanner.designsystem.theme.Icons.FlashOff,
-                            contentDescription = "Toggle Torch",
-                            tint = if (state.isTorchEnabled) Theme.colorScheme.primary else Color.White
-                        )
-                    }
-
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_settings),
-                            contentDescription = "Settings",
-                            tint = Color.White
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(bottom = 20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                SwipeableModeSelector(
-                    pagerState = docPagerState,
-                    items = docTypes.map { it.displayName },
-                    modifier = Modifier.padding(vertical = 12.dp)
-                )
-                CaptureButton(onClick = onTakePicture)
-                SwipeableModeSelector(
-                    pagerState = procPagerState,
-                    items = procModes.map { it.displayName },
-                    isBold = true,
-                    modifier = Modifier.padding(vertical = 12.dp)
-                )
-            }
         }
 
         if (flashOpacity > 0f) {
@@ -348,10 +293,131 @@ private fun CameraPreviewAndControls(
 }
 
 @Composable
+private fun CameraHeaderActions(
+    modifier: Modifier = Modifier,
+    isGridEnabled: Boolean,
+    isTorchEnabled: Boolean,
+    onToggleGridLines: () -> Unit,
+    onToggleTorch: () -> Unit,
+    onNavigateToSettings: () -> Unit,
+    iconTint: Color = Color.White
+) {
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .systemBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Spacer(modifier = Modifier.size(40.dp))
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .bounceClick {
+                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+                        onToggleGridLines()
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                SIcon(
+                    imageVector = io.goodmidnight.scanner.designsystem.theme.Icons.Grid3x3,
+                    contentDescription = "Toggle Grid Lines",
+                    tint = if (isGridEnabled) Theme.colorScheme.accent else iconTint,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .bounceClick {
+                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+                        onToggleTorch()
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                SIcon(
+                    imageVector = if (isTorchEnabled) io.goodmidnight.scanner.designsystem.theme.Icons.FlashOn else io.goodmidnight.scanner.designsystem.theme.Icons.FlashOff,
+                    contentDescription = "Toggle Torch",
+                    tint = if (isTorchEnabled) Theme.colorScheme.accent else iconTint,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .bounceClick {
+                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+                        onNavigateToSettings()
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                SIcon(
+                    imageVector = io.goodmidnight.scanner.designsystem.theme.Icons.Settings,
+                    contentDescription = "Settings",
+                    tint = iconTint,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun CameraFooterControls(
+    modifier: Modifier = Modifier,
+    docPagerState: PagerState,
+    procPagerState: PagerState,
+    docTypes: List<SharedState.DocumentType>,
+    procModes: List<SharedState.CaptureMode>,
+    onTakePicture: () -> Unit
+) {
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(bottom = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        SwipeableModeSelector(
+            pagerState = docPagerState,
+            items = docTypes.map { it.displayName },
+            modifier = Modifier.padding(vertical = 12.dp)
+        )
+
+        CaptureButton(
+            onClick = {
+                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                onTakePicture()
+            }
+        )
+
+        SwipeableModeSelector(
+            pagerState = procPagerState,
+            items = procModes.map { it.displayName },
+            isBold = true,
+            modifier = Modifier.padding(vertical = 12.dp)
+        )
+    }
+}
+
+@Composable
 fun GridOverlay(
     modifier: Modifier = Modifier,
-    color: Color = Color.White.copy(alpha = 0.5f),
-    strokeWidth: Float = 1f,
+    color: Color = Color.White.copy(alpha = 0.4f),
+    strokeWidth: Float = 1.2f,
 ) {
     Canvas(modifier = modifier.fillMaxSize()) {
         val width = size.width
@@ -395,7 +461,7 @@ fun SCameraScreenPreview() {
             LocalSnackbarHostState provides SnackbarHostState(),
         ) {
             CameraScreen(
-                state = CameraState(),
+                state = CameraState(showGridLines = true),
                 sharedState = SharedState(
                     showGridLines = true,
                     detectedFrame = SharedState.DocumentFrameState(
@@ -405,7 +471,6 @@ fun SCameraScreenPreview() {
                         isStable = true
                     )
                 ),
-                onBack = {},
                 onInitCamera = { _, _ -> },
                 onTakePicture = {},
                 onChangeDocumentType = {},
@@ -417,4 +482,3 @@ fun SCameraScreenPreview() {
         }
     }
 }
-
