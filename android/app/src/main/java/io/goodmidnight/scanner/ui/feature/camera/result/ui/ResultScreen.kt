@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -59,7 +58,7 @@ fun ResultScreen(
     onSelectFormat: (SaveFormat) -> Unit,
     onDismissDialog: () -> Unit,
     onShare: (Bitmap) -> Unit,
-    onTextCopy: () -> Unit
+    onTextCopy: () -> Unit,
 ) {
     val clipboardManager = LocalClipboardManager.current
     val captureResult = sharedState.captureResult
@@ -70,7 +69,7 @@ fun ResultScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             STitleTopBar(
-                title = "스캔 결과",
+                title = "Scan Result",
                 onBack = onBack
             )
         },
@@ -118,7 +117,7 @@ fun ResultScreen(
 private fun ResultDocumentCard(
     modifier: Modifier = Modifier,
     bitmap: Bitmap?,
-    ocrBlocks: List<io.goodmidnight.scanner.model.OcrBlock>
+    ocrBlocks: List<io.goodmidnight.scanner.model.OcrBlock>,
 ) {
     Box(
         modifier = modifier
@@ -156,7 +155,7 @@ private fun ResultDocumentCard(
 @Composable
 private fun ResultExtractedTextPanel(
     modifier: Modifier = Modifier,
-    text: String
+    text: String,
 ) {
     Column(
         modifier = modifier
@@ -164,7 +163,7 @@ private fun ResultExtractedTextPanel(
             .padding(horizontal = 24.dp, vertical = 12.dp)
     ) {
         STitleMediumText(
-            text = "추출된 텍스트",
+            text = "Extracted Text",
             color = Theme.colorScheme.primaryText
         )
 
@@ -195,13 +194,12 @@ private fun ResultBottomBar(
     hasText: Boolean,
     onShare: () -> Unit,
     onSave: () -> Unit,
-    onCopy: () -> Unit
+    onCopy: () -> Unit,
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
             .background(Theme.colorScheme.surface)
-            .navigationBarsPadding()
             .padding(vertical = 16.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -213,20 +211,20 @@ private fun ResultBottomBar(
             ResultBottomBarButton(
                 onClick = onShare,
                 icon = io.goodmidnight.scanner.designsystem.theme.Icons.Share,
-                text = "공유",
+                text = "Share",
                 enabled = bitmap != null
             )
             ResultBottomBarButton(
                 onClick = onSave,
                 icon = io.goodmidnight.scanner.designsystem.theme.Icons.Folder,
-                text = "저장",
+                text = "Save",
                 enabled = bitmap != null
             )
             if (hasText) {
                 ResultBottomBarButton(
                     onClick = onCopy,
                     icon = io.goodmidnight.scanner.designsystem.theme.Icons.SaveAlt,
-                    text = "텍스트 복사",
+                    text = "Copy Text",
                     enabled = true
                 )
             }
@@ -240,10 +238,11 @@ private fun ResultBottomBarButton(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     text: String,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
-    val contentColor = if (enabled) Theme.colorScheme.primaryText else Theme.colorScheme.disabledText
+    val contentColor =
+        if (enabled) Theme.colorScheme.primaryText else Theme.colorScheme.disabledText
 
     Column(
         modifier = modifier
@@ -272,17 +271,17 @@ private fun ResultBottomBarButton(
 @Composable
 private fun ResultFormatDialog(
     onDismiss: () -> Unit,
-    onSelectFormat: (SaveFormat) -> Unit
+    onSelectFormat: (SaveFormat) -> Unit,
 ) {
     SDialog(onDismissRequest = onDismiss) {
         STitleMediumText(
-            text = "저장 형식 선택",
+            text = "Select Save Format",
             modifier = Modifier.fillMaxWidth(),
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
         Spacer(modifier = Modifier.height(16.dp))
         SBodyMediumText(
-            text = "스캔한 문서를 저장할 포맷을 선택해 주세요.",
+            text = "Please select a format to save the scanned document.",
             modifier = Modifier.fillMaxWidth(),
             color = Theme.colorScheme.secondaryText,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -293,22 +292,22 @@ private fun ResultFormatDialog(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             SButton(
-                text = "JPEG 이미지로 저장",
+                text = "Save as JPEG",
                 onClick = { onSelectFormat(SaveFormat.JPEG) },
                 modifier = Modifier.fillMaxWidth()
             )
             SButton(
-                text = "PNG 이미지로 저장",
+                text = "Save as PNG",
                 onClick = { onSelectFormat(SaveFormat.PNG) },
                 modifier = Modifier.fillMaxWidth()
             )
             SButton(
-                text = "PDF 문서로 저장",
+                text = "Save as PDF",
                 onClick = { onSelectFormat(SaveFormat.PDF) },
                 modifier = Modifier.fillMaxWidth()
             )
             SButton(
-                text = "취소",
+                text = "Cancel",
                 onClick = onDismiss,
                 type = SButtonType.SECONDARY,
                 modifier = Modifier.fillMaxWidth()
