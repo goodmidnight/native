@@ -77,6 +77,12 @@ class SharedViewModel @Inject constructor(
                         captureMode = event.processingMode
                     )
                 }
+
+                is SharedEvent.OnCompleteCrop -> {
+                    viewModelScope.launch {
+                        processCompleteCrop(event.points, event.selectedFilter)
+                    }
+                }
             }
         }
         bindError { error ->
@@ -109,7 +115,7 @@ class SharedViewModel @Inject constructor(
         cameraController.cameraSideEffect.collect { effect ->
             when (effect) {
                 is CameraEffect.SendPreviewFrame -> detectFrame(effect.bitmap, effect.rotation)
-                is CameraEffect.SendCapturedImage -> captureDocument(
+                is CameraEffect.SendCapturedImage -> onImageCaptured(
                     effect.bitmap,
                     effect.rotation,
                     effect.processingMode
@@ -119,6 +125,21 @@ class SharedViewModel @Inject constructor(
                     emitError(AppError.of(effect.exception))
                 }
             }
+        }
+    }
+
+    private fun onImageCaptured(
+        bitmap: Bitmap,
+        rotation: Int,
+        processingMode: Int,
+    ) {
+        updateState {
+            copy(
+                rawCapturedBitmap = bitmap,
+                rawCapturedRotation = rotation,
+                rawCapturedProcessingMode = processingMode,
+                currentStep = SharedState.ScannerStep.CROP_EDIT
+            )
         }
     }
 
@@ -149,19 +170,22 @@ class SharedViewModel @Inject constructor(
         }
     }
 
-    private suspend fun captureDocument(
-        bitmap: Bitmap,
-        rotation: Int,
-        processingMode: Int,
+    private suspend fun processCompleteCrop(
+        editedPoints: FloatArray,
+        selectedFilterIndex: Int,
     ) {
+        val bitmap = state.value.rawCapturedBitmap ?: return
+        val rotation = state.value.rawCapturedRotation
         val lastKnownFrameState = state.value.detectedFrame ?: return
         if (state.value.currentStep == SharedState.ScannerStep.RESULT) return
 
+        updateState { copy(currentStep = SharedState.ScannerStep.CAPTURING) }
+
         val domainFrame = DocumentFrame(
-            points = lastKnownFrameState.points,
-            isDetected = lastKnownFrameState.isDetected,
-            confidence = lastKnownFrameState.confidence,
-            isStable = lastKnownFrameState.isStable
+            points = editedPoints,
+            isDetected = true,
+            confidence = 1.0f,
+            isStable = true
         )
 
         val result = captureDocumentUseCase(
@@ -169,7 +193,7 @@ class SharedViewModel @Inject constructor(
             frame = domainFrame,
             previewWidth = lastKnownFrameState.imageWidth,
             previewHeight = lastKnownFrameState.imageHeight,
-            processingMode = processingMode,
+            processingMode = selectedFilterIndex,
             documentType = state.value.documentType.code,
             rotationDegrees = rotation
         )
@@ -208,7 +232,7 @@ class SharedViewModel @Inject constructor(
                 result.hasGlare -> emitEffect(SharedEffect.ShowSnackBar("Glare detected. Some text might be unreadable."))
             }
         } else {
-            updateState { copy(currentStep = SharedState.ScannerStep.PREVIEW) }
+            updateState { copy(currentStep = SharedState.ScannerStep.CROP_EDIT) }
 
             val errorMessage = when {
                 result?.isBlurry == true -> "The image is too blurry. Please hold the device steady and try again."

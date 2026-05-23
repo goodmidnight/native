@@ -28,11 +28,15 @@ data class SharedState(
     val captureMode: CaptureMode = CaptureMode.SCAN,
     val ocrLanguage: OcrLanguage = OcrLanguage.KOREAN,
     val currentStep: ScannerStep = ScannerStep.PREVIEW,
+    val rawCapturedBitmap: Bitmap? = null,
+    val rawCapturedRotation: Int = 0,
+    val rawCapturedProcessingMode: Int = 0,
 ) : BaseState {
 
     enum class ScannerStep {
         PREVIEW,
         CAPTURING,
+        CROP_EDIT,
         RESULT
     }
 

@@ -14,4 +14,5 @@ sealed interface SharedEvent : BaseEvent {
     data class OnChangeProcessingMode(val processingMode: SharedState.CaptureMode) : SharedEvent
     data class OnUpdateStep(val step: SharedState.ScannerStep) : SharedEvent
     object OnShutdownCamera : SharedEvent
+    data class OnCompleteCrop(val points: FloatArray, val selectedFilter: Int) : SharedEvent
 }
