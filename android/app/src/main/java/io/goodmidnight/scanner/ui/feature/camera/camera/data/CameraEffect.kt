@@ -6,6 +6,6 @@ sealed interface CameraEffect : BaseEffect {
     data class ShowSnackBar(val message: String) : CameraEffect
     data object PopBackStack : CameraEffect
 
-    data object NativeToResult: CameraEffect
+    data object NativeToCrop: CameraEffect
     data object TriggerShutterFeedback : CameraEffect
 }

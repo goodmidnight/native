@@ -39,15 +39,6 @@ class CameraViewModel @Inject constructor(
 
         bindEvent { event ->
             when (event) {
-                is CameraEvent.OnInitCamera -> {
-                    // Handled by SharedViewModel to coordinate global scan state
-                }
-                is CameraEvent.OnTakePicture -> {
-                    // Handled by SharedViewModel
-                }
-                is CameraEvent.OnShutdownCamera -> {
-                    // Handled by SharedViewModel
-                }
                 is CameraEvent.OnZoomRatioChanged -> {
                     cameraController.setZoomRatio(event.zoomRatio)
                 }
@@ -77,7 +68,7 @@ class CameraViewModel @Inject constructor(
 
     private fun navigateToResult() {
         viewModelScope.launch {
-            emitEffect(CameraEffect.NativeToResult)
+            emitEffect(CameraEffect.NativeToCrop)
         }
     }
 }

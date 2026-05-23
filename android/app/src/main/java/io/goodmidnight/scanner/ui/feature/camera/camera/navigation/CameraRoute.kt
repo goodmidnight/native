@@ -30,7 +30,7 @@ import kotlinx.coroutines.CoroutineScope
 fun CameraRoute(
     modifier: Modifier = Modifier,
     popBackStack: () -> Unit,
-    navigateToResult: () -> Unit,
+    navigateToCrop: () -> Unit,
     navigateToSettings: () -> Unit,
     sharedViewModel: SharedViewModel,
     viewModel: CameraViewModel = hiltViewModel(),
@@ -58,7 +58,7 @@ fun CameraRoute(
                 )
 
                 CameraEffect.PopBackStack -> popBackStack()
-                CameraEffect.NativeToResult -> navigateToResult()
+                CameraEffect.NativeToCrop -> navigateToCrop()
                 CameraEffect.TriggerShutterFeedback -> {
                     haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                     shutterTriggerTime = System.currentTimeMillis()
@@ -79,8 +79,8 @@ fun CameraRoute(
     }
 
     LaunchedEffect(sharedState.currentStep) {
-        if (sharedState.currentStep == SharedState.ScannerStep.RESULT) {
-            viewModel.onEvent(CameraEvent.OnNavigateToResult)
+        if (sharedState.currentStep == SharedState.ScannerStep.CROP_EDIT) {
+            navigateToCrop()
         }
     }
 

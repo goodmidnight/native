@@ -19,8 +19,8 @@ fun NavGraphBuilder.cameraScreen(
             navController.context.findActivity()?.finish()
         }
     }
-    val navigateToResult: () -> Unit = {
-        navController.navigate(MainGraph.Scan.Result.buildNavigationRoute())
+    val navigateToCrop: () -> Unit = {
+        navController.navigate(MainGraph.Scan.Crop.buildNavigationRoute())
     }
     val navigateToSettings: () -> Unit = {
         navController.navigate(MainGraph.Settings.buildNavigationRoute())
@@ -28,6 +28,6 @@ fun NavGraphBuilder.cameraScreen(
 
     composable(route) {
         val sharedViewModel = it.sharedViewModel<SharedViewModel>(navController)
-        CameraRoute(modifier, popBackStack, navigateToResult, navigateToSettings, sharedViewModel)
+        CameraRoute(modifier, popBackStack, navigateToCrop, navigateToSettings, sharedViewModel)
     }
 }
