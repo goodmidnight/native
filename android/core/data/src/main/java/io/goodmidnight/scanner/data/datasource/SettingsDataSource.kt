@@ -9,9 +9,6 @@ interface SettingsDataSource {
     val autoSaveToGallery: Flow<Boolean>
     suspend fun setAutoSaveToGallery(enabled: Boolean)
 
-    val defaultFilter: Flow<String>
-    suspend fun setDefaultFilter(filter: String)
-
     val theme: Flow<String>
     suspend fun setTheme(theme: String)
 

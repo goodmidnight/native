@@ -17,7 +17,6 @@ class SettingsDataStore @Inject constructor(
     private object PreferencesKeys {
         val IMAGE_QUALITY = stringPreferencesKey("image_quality")
         val AUTO_SAVE_TO_GALLERY = booleanPreferencesKey("auto_save_to_gallery")
-        val DEFAULT_FILTER = stringPreferencesKey("default_filter")
         val THEME = stringPreferencesKey("theme")
         val SHOW_GRID_LINES = booleanPreferencesKey("show_grid_lines")
     }
@@ -30,11 +29,6 @@ class SettingsDataStore @Inject constructor(
     override val autoSaveToGallery: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.AUTO_SAVE_TO_GALLERY] ?: false }
     override suspend fun setAutoSaveToGallery(enabled: Boolean) {
         dataStore.edit { it[PreferencesKeys.AUTO_SAVE_TO_GALLERY] = enabled }
-    }
-
-    override val defaultFilter: Flow<String> = dataStore.data.map { it[PreferencesKeys.DEFAULT_FILTER] ?: "ORIGINAL" }
-    override suspend fun setDefaultFilter(filter: String) {
-        dataStore.edit { it[PreferencesKeys.DEFAULT_FILTER] = filter }
     }
 
     override val theme: Flow<String> = dataStore.data.map { it[PreferencesKeys.THEME] ?: "SYSTEM" }
