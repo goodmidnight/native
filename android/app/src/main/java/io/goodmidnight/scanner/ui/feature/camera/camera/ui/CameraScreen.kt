@@ -12,6 +12,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +21,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.compose.foundation.gestures.detectTransformGestures
 import io.goodmidnight.scanner.designsystem.component.SBodyMediumText
 import io.goodmidnight.scanner.designsystem.component.SCircularProgress
 import io.goodmidnight.scanner.designsystem.component.SIcon
@@ -259,7 +258,7 @@ private fun CameraPreviewAndControls(
         }
 
         SScaffold(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().systemBarsPadding(),
             backgroundColor = Color.Transparent,
             topBar = {
                 CameraHeaderActions(
@@ -307,7 +306,6 @@ private fun CameraHeaderActions(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .systemBarsPadding()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -387,7 +385,6 @@ private fun CameraFooterControls(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .navigationBarsPadding()
             .padding(bottom = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
