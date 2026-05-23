@@ -1,4 +1,4 @@
-package io.goodmidnight.scanner.ui.core.activity
+package io.goodmidnight.scanner.core.activity
 
 import io.goodmidnight.scanner.ui.core.viewmodel.BaseEffect
 

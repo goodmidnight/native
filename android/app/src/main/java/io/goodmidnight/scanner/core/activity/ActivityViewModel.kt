@@ -1,4 +1,4 @@
-package io.goodmidnight.scanner.ui.core.activity
+package io.goodmidnight.scanner.core.activity
 
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
