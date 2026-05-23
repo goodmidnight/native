@@ -1,8 +1,13 @@
 package io.goodmidnight.scanner.ui.feature.settings.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -14,7 +19,7 @@ import io.goodmidnight.scanner.designsystem.preview.ComponentPreview
 import io.goodmidnight.scanner.designsystem.theme.Theme
 import io.goodmidnight.scanner.model.DefaultFilter
 import io.goodmidnight.scanner.model.ImageQuality
-import io.goodmidnight.scanner.model.Theme.*
+import io.goodmidnight.scanner.model.Theme.DARK
 import io.goodmidnight.scanner.ui.core.utils.LocalSnackbarHostState
 import io.goodmidnight.scanner.ui.feature.settings.data.SettingsState
 import io.goodmidnight.scanner.ui.feature.settings.ui.component.RadioGroupSettingsItem
@@ -34,7 +39,9 @@ fun SettingsScreen(
     onOpenSourceLicensesClicked: () -> Unit,
 ) {
     SScaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding(),
         topBar = {
             STitleTopBar(
                 title = "Settings",
@@ -45,8 +52,12 @@ fun SettingsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Theme.colorScheme.background)
-                .padding(padding)
+                .background(Theme.colorScheme.background),
+            contentPadding = PaddingValues(
+                top = padding.calculateTopPadding() + WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+                bottom = padding.calculateBottomPadding() + WindowInsets.navigationBars.asPaddingValues()
+                    .calculateBottomPadding()
+            )
         ) {
             item { SettingsHeader("Features") }
             item {
