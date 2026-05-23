@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +52,7 @@ fun SScaffold(
             Box(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
+                    .statusBarsPadding()
                     .onGloballyPositioned { coordinates ->
                         topBarHeight = with(density) { coordinates.size.height.toDp() }
                     }
@@ -62,6 +65,7 @@ fun SScaffold(
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
                     .onGloballyPositioned { coordinates ->
                         bottomBarHeight = with(density) { coordinates.size.height.toDp() }
                     }
