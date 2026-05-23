@@ -10,8 +10,6 @@ fun NavGraphBuilder.settingsScreen(
 ) {
     composable(route) {
         SettingsRoute(
-            onNavigateToOpenSource = { /* TODO */ },
-            onNavigateToPrivacyPolicy = { /* TODO */ },
             onBack = { navController.popBackStack() }
         )
     }

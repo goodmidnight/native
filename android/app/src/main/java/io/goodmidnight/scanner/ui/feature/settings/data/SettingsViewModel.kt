@@ -6,8 +6,6 @@ import io.goodmidnight.scanner.domain.usecase.ClearCacheUseCase
 import io.goodmidnight.scanner.domain.usecase.settings.GetSettingsUseCase
 import io.goodmidnight.scanner.domain.usecase.settings.UpdateSettingsUseCase
 import io.goodmidnight.scanner.domain.usecase.settings.UpdateSettingsUseCase.SettingType
-import io.goodmidnight.scanner.model.DefaultFilter
-import io.goodmidnight.scanner.model.ImageQuality
 import io.goodmidnight.scanner.ui.core.exception.AppError
 import io.goodmidnight.scanner.ui.core.viewmodel.BaseViewModel
 import kotlinx.coroutines.flow.launchIn
@@ -61,7 +59,12 @@ class SettingsViewModel @Inject constructor(
                     )
                 )
 
-                is SettingsEvent.OnThemeChanged -> updateSettingsUseCase(SettingType.UpdateTheme(event.theme))
+                is SettingsEvent.OnThemeChanged -> updateSettingsUseCase(
+                    SettingType.UpdateTheme(
+                        event.theme
+                    )
+                )
+
                 is SettingsEvent.OnShowGridLinesChanged -> updateSettingsUseCase(
                     SettingType.ShowGridLines(
                         event.enabled
@@ -70,12 +73,12 @@ class SettingsViewModel @Inject constructor(
 
                 SettingsEvent.OnClearCacheClicked -> {
                     val success = clearCacheUseCase()
-                    val message = if (success) "Cache cleared successfully" else "Failed to clear cache"
+                    val message =
+                        if (success) "Cache cleared successfully" else "Failed to clear cache"
                     emitEffect(SettingsEffect.ShowSnackbar(message))
                 }
 
                 SettingsEvent.OnOpenSourceLicensesClicked -> emitEffect(SettingsEffect.NavigateToOpenSourceLicenses)
-                SettingsEvent.OnPrivacyPolicyClicked -> emitEffect(SettingsEffect.NavigateToPrivacyPolicy)
             }
         }
     }

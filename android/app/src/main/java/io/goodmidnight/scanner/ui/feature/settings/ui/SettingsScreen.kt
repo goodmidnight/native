@@ -14,6 +14,7 @@ import io.goodmidnight.scanner.designsystem.preview.ComponentPreview
 import io.goodmidnight.scanner.designsystem.theme.Theme
 import io.goodmidnight.scanner.model.DefaultFilter
 import io.goodmidnight.scanner.model.ImageQuality
+import io.goodmidnight.scanner.model.Theme.*
 import io.goodmidnight.scanner.ui.core.utils.LocalSnackbarHostState
 import io.goodmidnight.scanner.ui.feature.settings.data.SettingsState
 import io.goodmidnight.scanner.ui.feature.settings.ui.component.RadioGroupSettingsItem
@@ -31,7 +32,6 @@ fun SettingsScreen(
     onThemeChanged: (io.goodmidnight.scanner.model.Theme) -> Unit,
     onShowGridLinesChanged: (Boolean) -> Unit,
     onOpenSourceLicensesClicked: () -> Unit,
-    onPrivacyPolicyClicked: () -> Unit,
 ) {
     SScaffold(
         modifier = Modifier.fillMaxSize(),
@@ -95,9 +95,6 @@ fun SettingsScreen(
                 SettingsItem(title = "Open Source Licenses", onClick = onOpenSourceLicensesClicked)
             }
             item {
-                SettingsItem(title = "Privacy Policy", onClick = onPrivacyPolicyClicked)
-            }
-            item {
                 SettingsItem(title = "App Version", subtitle = state.appVersion, onClick = {})
             }
         }
@@ -116,7 +113,7 @@ private fun SettingsScreenPreview() {
                     imageQuality = ImageQuality.HIGH,
                     autoSaveToGallery = false,
                     defaultFilter = DefaultFilter.BLACK_AND_WHITE,
-                    theme = io.goodmidnight.scanner.model.Theme.DARK,
+                    theme = DARK,
                     showGridLines = true,
                     appVersion = "1.0.0"
                 ),
@@ -127,7 +124,6 @@ private fun SettingsScreenPreview() {
                 onThemeChanged = {},
                 onShowGridLinesChanged = {},
                 onOpenSourceLicensesClicked = {},
-                onPrivacyPolicyClicked = {}
             )
         }
     }

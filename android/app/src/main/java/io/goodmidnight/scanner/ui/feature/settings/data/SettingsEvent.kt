@@ -13,5 +13,4 @@ sealed interface SettingsEvent : BaseEvent {
     data class OnShowGridLinesChanged(val enabled: Boolean) : SettingsEvent
     data object OnClearCacheClicked : SettingsEvent
     data object OnOpenSourceLicensesClicked : SettingsEvent
-    data object OnPrivacyPolicyClicked : SettingsEvent
 }

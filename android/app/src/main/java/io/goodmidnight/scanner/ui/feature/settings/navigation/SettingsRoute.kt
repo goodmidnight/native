@@ -15,8 +15,6 @@ import io.goodmidnight.scanner.ui.feature.settings.ui.SettingsScreen
 
 @Composable
 fun SettingsRoute(
-    onNavigateToOpenSource: () -> Unit,
-    onNavigateToPrivacyPolicy: () -> Unit,
     onBack: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
@@ -26,8 +24,9 @@ fun SettingsRoute(
     LaunchedEffect(Unit) {
         viewModel.bindEffect(this) { effect ->
             when (effect) {
-                SettingsEffect.NavigateToOpenSourceLicenses -> onNavigateToOpenSource()
-                SettingsEffect.NavigateToPrivacyPolicy -> onNavigateToPrivacyPolicy()
+                SettingsEffect.NavigateToOpenSourceLicenses -> {
+
+                }
                 is SettingsEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
             }
         }
@@ -76,6 +75,5 @@ fun SettingsRoute(
             }
         },
         onOpenSourceLicensesClicked = remember { { viewModel.onEvent(SettingsEvent.OnOpenSourceLicensesClicked) } },
-        onPrivacyPolicyClicked = remember { { viewModel.onEvent(SettingsEvent.OnPrivacyPolicyClicked) } }
     )
 }
