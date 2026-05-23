@@ -1,14 +1,18 @@
 # Native Scanner
 
-A cross-platform document scanner powered by a shared C++ core engine (OpenCV) with an Android application built on Jetpack Compose and MVI architecture.
+A cross-platform document scanner powered by a shared C++ core engine (OpenCV) with an Android
+application built on Jetpack Compose and MVI architecture.
 
 ## Key Features
 
-- **Real-time Document Detection** — Multi-criteria contour scoring with EMA smoothing for stable detection
+- **Real-time Document Detection** — Multi-criteria contour scoring with EMA smoothing for stable
+  detection
 - **Auto-stability Detection** — Hands-free capture trigger when document corners stabilize
 - **Perspective Correction** — Four-point warp transform for distortion-free output
-- **Dual Processing Modes** — Scan mode (clean whitening) and OCR mode (sharp binarization) via Strategy pattern
-- **Image Quality Validation** — Laplacian-based blur detection and overexposed pixel ratio glare check
+- **Dual Processing Modes** — Scan mode (clean whitening) and OCR mode (sharp binarization) via
+  Strategy pattern
+- **Image Quality Validation** — Laplacian-based blur detection and overexposed pixel ratio glare
+  check
 - **ML Kit OCR** — Korean text recognition on captured documents
 - **Custom Design System** — "Soft Monotone" theme built with Jetpack Compose
 
@@ -16,9 +20,12 @@ A cross-platform document scanner powered by a shared C++ core engine (OpenCV) w
 
 The project is organized into three layers designed for cross-platform reuse:
 
-- **C++ Core** — Platform-agnostic scanning engine built on OpenCV. Handles all image processing, contour detection, perspective correction, and post-processing.
-- **Platform Bindings** — JNI bridge for Android. iOS (Objective-C++) and desktop bindings are scaffolded.
-- **Android App** — Jetpack Compose UI with custom MVI architecture, Clean Architecture domain layer, and Hilt dependency injection.
+- **C++ Core** — Platform-agnostic scanning engine built on OpenCV. Handles all image processing,
+  contour detection, perspective correction, and post-processing.
+- **Platform Bindings** — JNI bridge for Android. iOS (Objective-C++) and desktop bindings are
+  scaffolded.
+- **Android App** — Jetpack Compose UI with custom MVI architecture, Clean Architecture domain
+  layer, and Hilt dependency injection.
 
 ## Project Structure
 
@@ -135,7 +142,9 @@ flowchart LR
 
 ### Desktop Tuning Tool
 
-The `cpp/desktop/` module provides an OpenCV GUI application for real-time parameter tuning. It opens a webcam feed with trackbar sliders for blur, glare, canny, and target width parameters, enabling rapid iteration on detection thresholds without deploying to a mobile device.
+The `cpp/desktop/` module provides an OpenCV GUI application for real-time parameter tuning. It
+opens a webcam feed with trackbar sliders for blur, glare, canny, and target width parameters,
+enabling rapid iteration on detection thresholds without deploying to a mobile device.
 
 ---
 
@@ -257,12 +266,12 @@ flowchart LR
     Effect -->|"bindEffect{}"| View
 ```
 
-| Channel | Type | Behavior |
-|---|---|---|
-| `STATE` | `MutableStateFlow` | Always holds current value, observers receive latest state on subscription |
-| `EVENT` | `Channel` | Buffered, `DROP_OLDEST` backpressure — user intents never block the UI |
+| Channel  | Type                | Behavior                                                                              |
+|----------|---------------------|---------------------------------------------------------------------------------------|
+| `STATE`  | `MutableStateFlow`  | Always holds current value, observers receive latest state on subscription            |
+| `EVENT`  | `Channel`           | Buffered, `DROP_OLDEST` backpressure — user intents never block the UI                |
 | `EFFECT` | `MutableSharedFlow` | 64-capacity buffer — one-shot side effects (navigation, toast) survive config changes |
-| `ERROR` | `MutableSharedFlow` | 1-capacity buffer, `DROP_OLDEST` — dedicated error propagation stream |
+| `ERROR`  | `MutableSharedFlow` | 1-capacity buffer, `DROP_OLDEST` — dedicated error propagation stream                 |
 
 ### Multi-Module & Build System
 
@@ -295,7 +304,9 @@ graph TB
 
 #### Build System Architecture
 
-The project uses a **convention plugin** architecture via Gradle's `includeBuild` mechanism. The `build-system/` directory is a standalone Gradle project that compiles independently and provides 15 custom plugins to the main build.
+The project uses a **convention plugin** architecture via Gradle's `includeBuild` mechanism. The
+`build-system/` directory is a standalone Gradle project that compiles independently and provides 15
+custom plugins to the main build.
 
 ```mermaid
 flowchart TB
@@ -328,19 +339,16 @@ flowchart TB
     Plugins -->|"applied via\nplugins { alias(...) }"| modules
 ```
 
-Each module applies plugins declaratively — a single `alias(libs.plugins.scanner.android.library.compose)` replaces hundreds of lines of boilerplate configuration. Plugins compose on top of each other: for example, `scanner.android.library.compose` builds upon `scanner.android.library` by adding Compose compiler configuration.
-
+Each module applies plugins declaratively — a single
+`alias(libs.plugins.scanner.android.library.compose)` replaces hundreds of lines of boilerplate
+configuration. Plugins compose on top of each other: for example, `scanner.android.library.compose`
+builds upon `scanner.android.library` by adding Compose compiler configuration.
 
 ## Screenshots
 
-<!-- Add your screenshot images here -->
-<!-- Example: ![Camera Preview](docs/screenshots/camera_preview.png) -->
-
-| Camera Preview |
-|:-:|
-| *Add screenshot here* |
-
----
+|                  Camera Preview                   |
+|:-------------------------------------------------:|
+| <img src="./assets/screenshot_01.jpg" width="30%"/> |
 
 ## License
 
