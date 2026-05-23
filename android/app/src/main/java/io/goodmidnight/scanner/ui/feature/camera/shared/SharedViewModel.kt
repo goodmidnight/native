@@ -133,6 +133,19 @@ class SharedViewModel @Inject constructor(
         rotation: Int,
         processingMode: Int,
     ) {
+        val lastFrame = state.value.detectedFrame
+        if (lastFrame == null || !lastFrame.isDetected) {
+            updateState {
+                copy(
+                    currentStep = SharedState.ScannerStep.PREVIEW
+                )
+            }
+            viewModelScope.launch {
+                emitEffect(SharedEffect.ShowSnackBar("No document detected. Please try again."))
+            }
+            return
+        }
+
         updateState {
             copy(
                 rawCapturedBitmap = bitmap,
@@ -191,8 +204,8 @@ class SharedViewModel @Inject constructor(
         val result = captureDocumentUseCase(
             srcBitmap = bitmap,
             frame = domainFrame,
-            previewWidth = lastKnownFrameState.imageWidth,
-            previewHeight = lastKnownFrameState.imageHeight,
+            previewWidth = bitmap.width,
+            previewHeight = bitmap.height,
             processingMode = selectedFilterIndex,
             documentType = state.value.documentType.code,
             rotationDegrees = rotation
