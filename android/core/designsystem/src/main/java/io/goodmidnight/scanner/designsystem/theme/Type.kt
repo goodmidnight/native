@@ -9,7 +9,6 @@ import androidx.compose.ui.unit.sp
 import io.goodmidnight.scanner.designsystem.R
 
 data class Type(
-    // Display styles (웅장하고 세련된 대형 텍스트)
     val displayLarge: TextStyle = TextStyle(
         fontFamily = PRETENDARD,
         fontWeight = FontWeight.Bold,
@@ -28,8 +27,6 @@ data class Type(
         fontSize = 28.sp,
         lineHeight = 36.sp
     ),
-
-    // Heading styles (구조적인 타이틀 및 중요 헤더)
     val headingXXLarge: TextStyle = TextStyle(
         fontFamily = PRETENDARD,
         fontWeight = FontWeight.Bold,
@@ -66,8 +63,6 @@ data class Type(
         fontSize = 14.sp,
         lineHeight = 20.sp
     ),
-
-    // Label styles (버튼, 마커, 컨트롤 및 메타 텍스트)
     val labelLarge: TextStyle = TextStyle(
         fontFamily = PRETENDARD,
         fontWeight = FontWeight.Medium,
@@ -92,8 +87,6 @@ data class Type(
         fontSize = 10.sp,
         lineHeight = 14.sp
     ),
-
-    // Paragraph styles (가독성이 뛰어난 본문 서술 텍스트)
     val paragraphLarge: TextStyle = TextStyle(
         fontFamily = PRETENDARD,
         fontWeight = FontWeight.Normal,

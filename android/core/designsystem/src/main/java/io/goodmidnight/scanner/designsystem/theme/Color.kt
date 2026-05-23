@@ -3,8 +3,6 @@ package io.goodmidnight.scanner.designsystem.theme
 import androidx.compose.ui.graphics.Color
 import io.goodmidnight.scanner.designsystem.theme.Alpha.LOW
 
-// --- Soft Monotone Palette ---
-// Light
 val Light_Background = Color(0xFFF8F9FA)
 val Light_Surface = Color(0xFFFFFFFF)
 val Light_PrimaryText = Color(0xFF212529)
@@ -26,9 +24,6 @@ val Dark_DisabledText = Color(0xFF4D5358)
 val Dark_Success = Color(0xFF24A148)
 val Dark_Error = Color(0xFFFA4D56)
 
-/**
- * 앱의 디자인 시스템에서 사용될 시멘틱(의미론적) 색상표를 정의합니다.
- */
 data class ColorScheme(
     val primary: Color,
     val secondary: Color,
