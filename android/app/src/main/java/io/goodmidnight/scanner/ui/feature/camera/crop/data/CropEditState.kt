@@ -9,6 +9,7 @@ import io.goodmidnight.scanner.ui.core.viewmodel.UiState
 data class CropEditState(
     val originalImage: Bitmap? = null,
     val vertexPoints: List<Offset> = emptyList(),
+    val initialPoints: List<Offset> = emptyList(),
     val activePinIndex: Int? = null,
     val dragOffset: Offset = Offset.Zero,
     val isSnapped: Boolean = false,

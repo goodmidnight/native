@@ -15,11 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,7 +26,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
-import androidx.activity.compose.BackHandler
 import io.goodmidnight.scanner.designsystem.component.SButton
 import io.goodmidnight.scanner.designsystem.component.SButtonType
 import io.goodmidnight.scanner.designsystem.component.SScaffold
@@ -36,15 +33,9 @@ import io.goodmidnight.scanner.designsystem.component.STitleTopBar
 import io.goodmidnight.scanner.designsystem.preview.ComponentPreview
 import io.goodmidnight.scanner.designsystem.theme.Theme
 import io.goodmidnight.scanner.ui.core.utils.LocalSnackbarHostState
-import io.goodmidnight.scanner.ui.core.utils.showSnackbarImmediately
-import io.goodmidnight.scanner.ui.feature.camera.crop.data.CropEditEffect
-import io.goodmidnight.scanner.ui.feature.camera.crop.data.CropEditEvent
 import io.goodmidnight.scanner.ui.feature.camera.crop.data.CropEditState
-import io.goodmidnight.scanner.ui.feature.camera.crop.data.CropEditViewModel
 import io.goodmidnight.scanner.ui.feature.camera.crop.ui.component.CropOverlay
-import io.goodmidnight.scanner.ui.feature.camera.shared.SharedEvent
 import io.goodmidnight.scanner.ui.feature.camera.shared.SharedState
-import io.goodmidnight.scanner.ui.feature.camera.shared.SharedViewModel
 
 @Composable
 fun CropEditScreen(
@@ -52,88 +43,8 @@ fun CropEditScreen(
     state: CropEditState,
     sharedState: SharedState,
     onBack: () -> Unit,
-    onNavigateToResult: () -> Unit,
-    sharedViewModel: SharedViewModel,
-    viewModel: CropEditViewModel
+    onComplete: (List<androidx.compose.ui.geometry.Offset>) -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    val snackbarHostState = LocalSnackbarHostState.current
-    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
-
-    // Initialize with original captured image and mapped high-res vertices on enter
-    LaunchedEffect(sharedState.rawCapturedBitmap, sharedState.detectedFrame) {
-        val bitmap = sharedState.rawCapturedBitmap
-        val frame = sharedState.detectedFrame
-        if (bitmap != null && frame != null) {
-            val previewW = frame.imageWidth
-            val previewH = frame.imageHeight
-            val capturedW = bitmap.width
-            val capturedH = bitmap.height
-
-            val scaleX = capturedW.toFloat() / previewW.toFloat()
-            val scaleY = capturedH.toFloat() / previewH.toFloat()
-
-            val mappedPoints = FloatArray(frame.points.size)
-            for (i in 0 until frame.points.size step 2) {
-                if (i + 1 < frame.points.size) {
-                    mappedPoints[i] = frame.points[i] * scaleX
-                    mappedPoints[i + 1] = frame.points[i + 1] * scaleY
-                }
-            }
-            viewModel.onEvent(CropEditEvent.OnInitialize(bitmap, mappedPoints))
-        }
-    }
-
-    BackHandler {
-        viewModel.onEvent(CropEditEvent.OnBack)
-    }
-
-    // Capture viewModel effects
-    LaunchedEffect(Unit) {
-        viewModel.bindEffect(scope = this) { effect ->
-            when (effect) {
-                is CropEditEffect.PopBackStack -> {
-                    sharedViewModel.onEvent(SharedEvent.OnUpdateStep(SharedState.ScannerStep.PREVIEW))
-                    onBack()
-                }
-                is CropEditEffect.NavigateToResult -> {
-                    // Collect final edited vertices in crop state and post OnCompleteCrop event to SharedViewModel
-                    val points = viewModel.state.value.vertexPoints
-                    if (points.size == 4) {
-                        val rawPts = FloatArray(8)
-                        for (i in 0 until 4) {
-                            rawPts[i * 2] = points[i].x
-                            rawPts[i * 2 + 1] = points[i].y
-                        }
-                        // Fire event in shared view model to compute warp and process OCR/save
-                        sharedViewModel.onEvent(
-                            SharedEvent.OnCompleteCrop(
-                                points = rawPts,
-                                selectedFilter = viewModel.state.value.selectedFilter
-                            )
-                        )
-                    }
-                }
-                is CropEditEffect.TriggerLongPressHaptic -> {
-                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                }
-                is CropEditEffect.TriggerSnapHaptic -> {
-                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
-                }
-                is CropEditEffect.ShowSnackBar -> {
-                    snackbarHostState.showSnackbarImmediately(coroutineScope, effect.message)
-                }
-            }
-        }
-    }
-
-    // Monitor global ScannerStep change to navigate to results
-    LaunchedEffect(sharedState.currentStep) {
-        if (sharedState.currentStep == SharedState.ScannerStep.RESULT) {
-            onNavigateToResult()
-        }
-    }
-
     val bitmap = state.originalImage
     val imageBitmap = remember(bitmap) { bitmap?.asImageBitmap() }
     val frameState = sharedState.detectedFrame
@@ -142,34 +53,12 @@ fun CropEditScreen(
         state.vertexPoints.toMutableList()
     }
 
-    val initialPoints = remember(frameState, bitmap) {
-        val points = mutableListOf<androidx.compose.ui.geometry.Offset>()
-        val rawPts = frameState?.points ?: floatArrayOf()
-        if (bitmap != null && frameState != null) {
-            val scaleX = bitmap.width.toFloat() / frameState.imageWidth.toFloat()
-            val scaleY = bitmap.height.toFloat() / frameState.imageHeight.toFloat()
-            for (i in 0 until 4) {
-                val xIndex = i * 2
-                val yIndex = i * 2 + 1
-                if (xIndex < rawPts.size && yIndex < rawPts.size) {
-                    points.add(
-                        androidx.compose.ui.geometry.Offset(
-                            rawPts[xIndex] * scaleX,
-                            rawPts[yIndex] * scaleY
-                        )
-                    )
-                }
-            }
-        }
-        points.toList()
-    }
-
     SScaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             STitleTopBar(
                 title = "Adjust Borders",
-                onBack = { viewModel.onEvent(CropEditEvent.OnBack) }
+                onBack = onBack
             )
         },
         bottomBar = {
@@ -184,7 +73,7 @@ fun CropEditScreen(
                 SButton(
                     text = "Retake",
                     type = SButtonType.SECONDARY,
-                    onClick = { viewModel.onEvent(CropEditEvent.OnBack) },
+                    onClick = onBack,
                     modifier = Modifier.weight(1f)
                 )
                 SButton(
@@ -192,17 +81,7 @@ fun CropEditScreen(
                     type = SButtonType.PRIMARY,
                     onClick = {
                         if (finalPointsRef.size == 4) {
-                            val rawPts = FloatArray(8)
-                            for (i in 0 until 4) {
-                                rawPts[i * 2] = finalPointsRef[i].x
-                                rawPts[i * 2 + 1] = finalPointsRef[i].y
-                            }
-                            sharedViewModel.onEvent(
-                                SharedEvent.OnCompleteCrop(
-                                    points = rawPts,
-                                    selectedFilter = viewModel.state.value.selectedFilter
-                                )
-                            )
+                            onComplete(finalPointsRef.toList())
                         }
                     },
                     modifier = Modifier.weight(1f)
@@ -243,7 +122,7 @@ fun CropEditScreen(
                     CropOverlay(
                         modifier = Modifier.fillMaxSize(),
                         vertexPoints = state.vertexPoints,
-                        initialPoints = initialPoints,
+                        initialPoints = state.initialPoints,
                         imageWidth = bitmap.width,
                         imageHeight = bitmap.height,
                         onPinDrag = { index, offset ->

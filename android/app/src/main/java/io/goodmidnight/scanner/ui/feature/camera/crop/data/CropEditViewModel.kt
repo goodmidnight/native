@@ -10,6 +10,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.sqrt
 
+import io.goodmidnight.scanner.ui.feature.camera.shared.SharedState
+
 @HiltViewModel
 class CropEditViewModel @Inject constructor() : BaseViewModel<CropEditState, CropEditEvent, CropEditEffect, AppError>(
     CropEditState()
@@ -22,22 +24,51 @@ class CropEditViewModel @Inject constructor() : BaseViewModel<CropEditState, Cro
         bindEvent { event ->
             when (event) {
                 is CropEditEvent.OnInitialize -> {
-                    previewWidth = event.initialPoints.getOrNull(0)?.toInt() ?: event.image.width
-                    // Map FloatArray [x0, y0, x1, y1, ...] to List<Offset>
+                    val bitmap = event.image
+                    val frame = event.detectedFrame
                     val points = mutableListOf<Offset>()
-                    for (i in 0 until 4) {
-                        val xIndex = i * 2
-                        val yIndex = i * 2 + 1
-                        if (xIndex < event.initialPoints.size && yIndex < event.initialPoints.size) {
-                            points.add(Offset(event.initialPoints[xIndex], event.initialPoints[yIndex]))
+                    
+                    if (frame != null) {
+                        val previewW = frame.imageWidth
+                        val previewH = frame.imageHeight
+                        val capturedW = bitmap.width
+                        val capturedH = bitmap.height
+
+                        val scaleX = if (previewW > 0) capturedW.toFloat() / previewW.toFloat() else 1f
+                        val scaleY = if (previewH > 0) capturedH.toFloat() / previewH.toFloat() else 1f
+
+                        val rawPts = frame.points
+                        for (i in 0 until 4) {
+                            val xIndex = i * 2
+                            val yIndex = i * 2 + 1
+                            if (xIndex < rawPts.size && yIndex < rawPts.size) {
+                                points.add(
+                                    Offset(
+                                        rawPts[xIndex] * scaleX,
+                                        rawPts[yIndex] * scaleY
+                                    )
+                                )
+                            }
                         }
                     }
+
+                    if (points.size < 4) {
+                        points.clear()
+                        val w = bitmap.width.toFloat()
+                        val h = bitmap.height.toFloat()
+                        points.add(Offset(w * 0.1f, h * 0.1f))
+                        points.add(Offset(w * 0.9f, h * 0.1f))
+                        points.add(Offset(w * 0.9f, h * 0.9f))
+                        points.add(Offset(w * 0.1f, h * 0.9f))
+                    }
+
                     initialVertexPoints = points.toList()
 
                     updateState {
                         copy(
-                            originalImage = event.image,
+                            originalImage = bitmap,
                             vertexPoints = points,
+                            initialPoints = points,
                             selectedFilter = 0
                         )
                     }
@@ -66,14 +97,19 @@ class CropEditViewModel @Inject constructor() : BaseViewModel<CropEditState, Cro
                 }
 
                 is CropEditEvent.OnCompleteCrop -> {
-                    val points = state.value.vertexPoints
+                    val points = event.points
                     if (points.size == 4) {
                         val floatPts = FloatArray(8)
                         for (i in 0 until 4) {
                             floatPts[i * 2] = points[i].x
                             floatPts[i * 2 + 1] = points[i].y
                         }
-                        emitEffect(CropEditEffect.NavigateToResult(state.value.originalImage!!))
+                        emitEffect(
+                            CropEditEffect.NavigateToResult(
+                                points = floatPts,
+                                filterIndex = state.value.selectedFilter
+                            )
+                        )
                     }
                 }
 

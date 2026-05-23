@@ -4,10 +4,12 @@ import android.graphics.Bitmap
 import androidx.compose.ui.geometry.Offset
 import io.goodmidnight.scanner.ui.core.viewmodel.BaseEvent
 
+import io.goodmidnight.scanner.ui.feature.camera.shared.SharedState
+
 sealed interface CropEditEvent : BaseEvent {
     data class OnInitialize(
         val image: Bitmap,
-        val initialPoints: FloatArray
+        val detectedFrame: SharedState.DocumentFrameState?
     ) : CropEditEvent
 
     data class OnPinTouchDown(val index: Int) : CropEditEvent
@@ -21,7 +23,7 @@ sealed interface CropEditEvent : BaseEvent {
 
     data class OnSelectFilter(val filterIndex: Int) : CropEditEvent
 
-    data object OnCompleteCrop : CropEditEvent
+    data class OnCompleteCrop(val points: List<Offset>) : CropEditEvent
 
     data object OnBack : CropEditEvent
 }

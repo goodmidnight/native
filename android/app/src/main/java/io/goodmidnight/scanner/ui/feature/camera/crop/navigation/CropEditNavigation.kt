@@ -27,20 +27,15 @@ fun NavGraphBuilder.cropEditScreen(
         }
     }
 
+
     composable(route) { backStackEntry ->
         val sharedViewModel = backStackEntry.sharedViewModel<SharedViewModel>(navController)
-        val viewModel = hiltViewModel<CropEditViewModel>()
-        val state by viewModel.state.collectAsStateWithLifecycle()
-        val sharedState by sharedViewModel.state.collectAsStateWithLifecycle()
 
-        CropEditScreen(
+        CropEditRoute(
             modifier = modifier,
-            state = state,
-            sharedState = sharedState,
-            onBack = popBackStack,
-            onNavigateToResult = navigateToResult,
-            sharedViewModel = sharedViewModel,
-            viewModel = viewModel
+            popBackStack = popBackStack,
+            navigateToResult = navigateToResult,
+            sharedViewModel = sharedViewModel
         )
     }
 }
