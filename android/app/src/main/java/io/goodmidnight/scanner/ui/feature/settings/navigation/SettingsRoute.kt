@@ -60,15 +60,6 @@ fun SettingsRoute(
                 )
             }
         },
-        onDefaultFilterChanged = remember {
-            {
-                viewModel.onEvent(
-                    SettingsEvent.OnDefaultFilterChanged(
-                        it
-                    )
-                )
-            }
-        },
         onThemeChanged = remember { { viewModel.onEvent(SettingsEvent.OnThemeChanged(it)) } },
         onShowGridLinesChanged = remember {
             {

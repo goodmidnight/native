@@ -17,7 +17,6 @@ import io.goodmidnight.scanner.designsystem.component.SScaffold
 import io.goodmidnight.scanner.designsystem.component.STitleTopBar
 import io.goodmidnight.scanner.designsystem.preview.ComponentPreview
 import io.goodmidnight.scanner.designsystem.theme.Theme
-import io.goodmidnight.scanner.model.DefaultFilter
 import io.goodmidnight.scanner.model.ImageQuality
 import io.goodmidnight.scanner.model.Theme.DARK
 import io.goodmidnight.scanner.ui.core.utils.LocalSnackbarHostState
@@ -33,7 +32,6 @@ fun SettingsScreen(
     onBack: () -> Unit,
     onImageQualityChanged: (ImageQuality) -> Unit,
     onAutoSaveToGalleryChanged: (Boolean) -> Unit,
-    onDefaultFilterChanged: (DefaultFilter) -> Unit,
     onThemeChanged: (io.goodmidnight.scanner.model.Theme) -> Unit,
     onShowGridLinesChanged: (Boolean) -> Unit,
     onOpenSourceLicensesClicked: () -> Unit,
@@ -73,14 +71,6 @@ fun SettingsScreen(
                     title = "Auto-save to Gallery",
                     checked = state.autoSaveToGallery,
                     onCheckedChange = onAutoSaveToGalleryChanged
-                )
-            }
-            item {
-                RadioGroupSettingsItem(
-                    title = "Default Filter",
-                    options = DefaultFilter.entries.map { it.name to it },
-                    selectedOption = state.defaultFilter,
-                    onOptionSelected = onDefaultFilterChanged
                 )
             }
 
@@ -123,7 +113,6 @@ private fun SettingsScreenPreview() {
                 state = SettingsState(
                     imageQuality = ImageQuality.HIGH,
                     autoSaveToGallery = false,
-                    defaultFilter = DefaultFilter.BLACK_AND_WHITE,
                     theme = DARK,
                     showGridLines = true,
                     appVersion = "1.0.0"
@@ -131,7 +120,6 @@ private fun SettingsScreenPreview() {
                 onBack = {},
                 onImageQualityChanged = {},
                 onAutoSaveToGalleryChanged = {},
-                onDefaultFilterChanged = {},
                 onThemeChanged = {},
                 onShowGridLinesChanged = {},
                 onOpenSourceLicensesClicked = {},

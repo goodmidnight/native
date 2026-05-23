@@ -26,7 +26,6 @@ class SettingsViewModel @Inject constructor(
                 copy(
                     imageQuality = settings.imageQuality,
                     autoSaveToGallery = settings.autoSaveToGallery,
-                    defaultFilter = settings.defaultFilter,
                     theme = settings.theme,
                     showGridLines = settings.showGridLines,
                 )
@@ -50,12 +49,6 @@ class SettingsViewModel @Inject constructor(
                 is SettingsEvent.OnAutoSaveToGalleryChanged -> updateSettingsUseCase(
                     SettingType.AutoSaveToGallery(
                         event.enabled
-                    )
-                )
-
-                is SettingsEvent.OnDefaultFilterChanged -> updateSettingsUseCase(
-                    SettingType.UpdateDefaultFilter(
-                        event.filter
                     )
                 )
 
