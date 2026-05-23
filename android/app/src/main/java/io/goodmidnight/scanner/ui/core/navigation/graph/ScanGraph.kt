@@ -12,6 +12,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.navigation
 import io.goodmidnight.scanner.ui.core.navigation.MainGraph
 import io.goodmidnight.scanner.ui.feature.camera.camera.navigation.cameraScreen
+import io.goodmidnight.scanner.ui.feature.camera.crop.navigation.cropEditScreen
 import io.goodmidnight.scanner.ui.feature.camera.result.navigation.resultScreen
 
 fun NavGraphBuilder.scanGraphBuilder(
@@ -47,6 +48,11 @@ fun NavGraphBuilder.scanGraphBuilder(
             modifier = modifier,
             navController = navController,
             route = MainGraph.Scan.Camera.destinationRoute
+        )
+        cropEditScreen(
+            modifier = modifier,
+            navController = navController,
+            route = MainGraph.Scan.Crop.destinationRoute
         )
         resultScreen(
             modifier = modifier,

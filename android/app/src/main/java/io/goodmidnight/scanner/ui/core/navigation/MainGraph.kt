@@ -9,6 +9,11 @@ sealed class MainGraph(
             fun buildNavigationRoute(): String = super.buildNavigationRoute(route)
         }
 
+        data object Crop : MainGraph("scan/crop"), NavigationRoute {
+            override val destinationRoute: String = route
+            fun buildNavigationRoute(): String = super.buildNavigationRoute(route)
+        }
+
         data object Result : MainGraph("scan/result"), NavigationRoute {
             override val destinationRoute = route
             fun buildNavigationRoute(): String = super.buildNavigationRoute(route)
