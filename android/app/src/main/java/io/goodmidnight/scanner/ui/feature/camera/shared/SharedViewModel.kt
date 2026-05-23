@@ -53,7 +53,7 @@ class SharedViewModel @Inject constructor(
                     if (state.value.currentStep == SharedState.ScannerStep.PREVIEW) {
                         updateState { copy(currentStep = SharedState.ScannerStep.CAPTURING) }
                         cameraController.processEvent(
-                            TakePicture(state.value.defaultFilter.code)
+                            TakePicture(state.value.captureMode.code)
                         )
                     }
                 }
@@ -93,7 +93,6 @@ class SharedViewModel @Inject constructor(
                     copy(
                         imageQuality = ImageQuality.valueOf(settings.imageQuality.name),
                         autoSaveToGallery = settings.autoSaveToGallery,
-                        defaultFilter = SharedState.FilterMode.valueOf(settings.defaultFilter.name),
                         showGridLines = settings.showGridLines
                     )
                 }

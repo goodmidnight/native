@@ -19,7 +19,6 @@ data class SharedState(
     // Settings
     val imageQuality: ImageQuality = ImageQuality.MEDIUM,
     val autoSaveToGallery: Boolean = false,
-    val defaultFilter: FilterMode = FilterMode.ORIGINAL,
     val showGridLines: Boolean = false,
 
     // Scanner State
@@ -30,12 +29,6 @@ data class SharedState(
     val ocrLanguage: OcrLanguage = OcrLanguage.KOREAN,
     val currentStep: ScannerStep = ScannerStep.PREVIEW,
 ) : BaseState {
-
-    enum class FilterMode(val code: Int, val displayName: String) {
-        ORIGINAL(0, "Original"),
-        GRAYSCALE(1, "Grayscale"),
-        BLACK_AND_WHITE(2, "B&W")
-    }
 
     enum class ScannerStep {
         PREVIEW,
