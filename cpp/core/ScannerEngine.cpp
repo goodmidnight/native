@@ -137,11 +137,6 @@ namespace native_scanner {
                 return result;
             }
 
-            bool srcIsPortrait = rotated_src.rows >= rotated_src.cols;
-            bool warpedIsPortrait = warped.rows >= warped.cols;
-            if (srcIsPortrait != warpedIsPortrait) {
-                cv::rotate(warped, warped, cv::ROTATE_90_CLOCKWISE);
-            }
 
             cv::Mat gray_warped;
             cv::cvtColor(warped, gray_warped, cv::COLOR_BGR2GRAY);
