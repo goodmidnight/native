@@ -105,60 +105,6 @@ classDiagram
     IPostprocessor <|.. OcrProcessor
 ```
 
-### Key Types
-
-```mermaid
-classDiagram
-    class ScannerConfig {
-        +int target_width = 800
-        +float canny_sigma = 0.33
-        +double min_area_ratio = 0.15
-        +bool low_light_mode = false
-        +double blur_threshold = 50.0
-        +double glare_threshold_general = 0.08
-        +double glare_threshold_id = 0.05
-    }
-
-    class DocumentFrame {
-        +vector~Point2f~ points
-        +bool is_detected
-        +float confidence
-        +bool is_stable
-    }
-
-    class CaptureResult {
-        +Mat image
-        +CaptureStatus status
-        +bool is_blurry
-        +bool has_glare
-        +string message
-    }
-
-    class ProcessingMode {
-        <<enumeration>>
-        SCAN
-        OCR
-    }
-
-    class DocumentType {
-        <<enumeration>>
-        GENERAL
-        ID_CARD
-        BUSINESS_CARD
-        RECEIPT
-    }
-
-    class CaptureStatus {
-        <<enumeration>>
-        SUCCESS
-        ERR_NOT_DETECTED
-        ERR_BLURRY
-        ERR_GLARE
-        ERR_WARP_FAILED
-        ERR_EMPTY_IMAGE
-    }
-```
-
 ### Document Detection Flow
 
 Real-time processing pipeline for each camera preview frame:
@@ -216,19 +162,19 @@ android/
 ```mermaid
 sequenceDiagram
     participant Camera
-    participant SharedViewModel
+    participant ViewModel
     participant DetectUseCase
     participant JNI
     participant ScannerEngine
 
-    Camera->>SharedViewModel: Preview frame (Bitmap)
-    SharedViewModel->>DetectUseCase: detectDocument()
+    Camera->>ViewModel: Preview frame (Bitmap)
+    ViewModel->>DetectUseCase: detectDocument()
     DetectUseCase->>JNI: nativeDetect()
     JNI->>ScannerEngine: detectDocument(Mat)
     ScannerEngine-->>JNI: DocumentFrame
     JNI-->>DetectUseCase: DocumentFrame
-    DetectUseCase-->>SharedViewModel: DocumentFrame
-    SharedViewModel-->>Camera: Draw detection overlay
+    DetectUseCase-->>ViewModel: DocumentFrame
+    ViewModel-->>Camera: Draw detection overlay
 ```
 
 ### Document Capture Sequence
@@ -236,27 +182,27 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant Camera
-    participant SharedViewModel
+    participant ViewModel
     participant CaptureUseCase
     participant JNI
     participant ScannerEngine
     participant OcrUseCase
 
-    Camera->>SharedViewModel: Shutter tap → high-res Bitmap
-    SharedViewModel->>SharedViewModel: Crop edit (user adjusts corners)
-    SharedViewModel->>CaptureUseCase: captureDocument()
+    Camera->>ViewModel: Shutter tap → high-res Bitmap
+    ViewModel->>ViewModel: Crop edit (user adjusts corners)
+    ViewModel->>CaptureUseCase: captureDocument()
     CaptureUseCase->>JNI: nativeCapture()
     JNI->>ScannerEngine: captureDocument(Mat)
     ScannerEngine-->>JNI: CaptureResult
     JNI-->>CaptureUseCase: CaptureResult
-    CaptureUseCase-->>SharedViewModel: CaptureResult
+    CaptureUseCase-->>ViewModel: CaptureResult
 
     opt OCR Mode
-        SharedViewModel->>OcrUseCase: recognizeText()
-        OcrUseCase-->>SharedViewModel: OcrBlocks
+        ViewModel->>OcrUseCase: recognizeText()
+        OcrUseCase-->>ViewModel: OcrBlocks
     end
 
-    SharedViewModel-->>Camera: Display result
+    ViewModel-->>Camera: Display result
 ```
 
 ### MVI Architecture
@@ -333,7 +279,6 @@ graph TB
     app --> core:jni
 
     core:jni --> core:data
-    core:jni --> core:domain
     core:jni --> core:model
 
     core:data --> core:domain
@@ -344,7 +289,6 @@ graph TB
     core:datastore --> core:data
     core:datastore --> core:model
 
-    core:ml --> core:domain
     core:ml --> core:model
     core:ml --> core:data
 ```
@@ -386,13 +330,6 @@ flowchart TB
 
 Each module applies plugins declaratively — a single `alias(libs.plugins.scanner.android.library.compose)` replaces hundreds of lines of boilerplate configuration. Plugins compose on top of each other: for example, `scanner.android.library.compose` builds upon `scanner.android.library` by adding Compose compiler configuration.
 
-Key conventions enforced:
-- **SDK versions** — `compileSdk 36`, `targetSdk 36`, `minSdk 28` (centralized in `AndroidBuildConfig`)
-- **Java/Kotlin** — Java 21 source compatibility, Kotlin 2.2
-- **Build flavors** — `dev`, `staging`, `live` with per-flavor app labels
-- **Version catalog** — All dependency versions managed in a single `libs.versions.toml`, shared between the main build and convention plugins
-
----
 
 ## Screenshots
 
