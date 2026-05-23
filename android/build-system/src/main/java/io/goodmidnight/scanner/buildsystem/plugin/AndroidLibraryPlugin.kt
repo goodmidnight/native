@@ -38,7 +38,7 @@ class AndroidLibraryPlugin : Plugin<Project> {
                         isMinifyEnabled = false
                     }
                     getByName(RELEASE) {
-                        // 릴리즈 빌드에서 ProGuard를 활성화
+                        // Enable ProGuard for release builds
                         isMinifyEnabled = false
                         proguardFiles(
                             getDefaultProguardFile("proguard-android-optimize.txt"),

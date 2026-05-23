@@ -220,7 +220,7 @@ fun SHeadingXSmallText(
     )
 }
 
-// --- Label Styles (컨트롤, 버튼, 미니 메타데이터) ---
+// --- Label Styles (controls, buttons, mini metadata) ---
 
 @Composable
 fun SLabelLargeText(
@@ -284,7 +284,7 @@ fun SLabelXSmallText(
     )
 }
 
-// --- Paragraph Styles (본문 설명 텍스트) ---
+// --- Paragraph Styles (body description text) ---
 
 @Composable
 fun SParagraphLargeText(
@@ -368,7 +368,7 @@ fun SParagraphXSmallText(
     )
 }
 
-// --- 하위 호환용 래퍼 컴포넌트 (기존 코드 연동용) ---
+// --- Legacy wrapper components (backward compatibility) ---
 
 @Composable
 fun SHeadlineLargeText(

@@ -366,18 +366,18 @@ fun STextFieldPreview() {
             SUnderlineTextField(
                 value = value,
                 onValueChange = { value = it },
-                placeHolder = "이름을 입력하세요"
+                placeHolder = "Enter your name"
             )
             SContainerTextField(
                 value = value,
                 onValueChange = { value = it },
-                placeHolder = "둥글고 은은한 입력창"
+                placeHolder = "Rounded soft input field"
             )
             SSearchTextField(
                 value = value,
                 onValueChange = { value = it },
                 onSearch = {},
-                placeHolder = "검색어 입력"
+                placeHolder = "Enter search term"
             )
         }
     }

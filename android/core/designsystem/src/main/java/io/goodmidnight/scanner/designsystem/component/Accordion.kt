@@ -70,7 +70,7 @@ fun SAccordion(
             )
             SIcon(
                 imageVector = Icons.KeyboardArrowDown,
-                contentDescription = if (expanded) "접기" else "펼치기",
+                contentDescription = if (expanded) "Collapse" else "Expand",
                 tint = Theme.colorScheme.secondaryText,
                 modifier = Modifier
                     .size(24.dp)
@@ -109,25 +109,25 @@ fun SAccordionPreview() {
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            SAccordion(title = "자동 스캔 가이드") {
+            SAccordion(title = "Auto Scan Guide") {
                 SParagraphMediumText(
-                    text = "스캐너 카메라를 문서 위에 똑바로 놓고 기다리면, 녹색 외곽선 영역이 꽉 찬 뒤에 자동으로 촬영이 시작됩니다. 조명이 너무 밝거나 어둡지 않게 유지해 주세요.",
+                    text = "Hold the scanner camera straight over the document and wait. Capture begins automatically once the green outline fills the area. Keep lighting moderate.",
                     color = Theme.colorScheme.secondaryText
                 )
             }
 
-            SAccordion(title = "지원하는 내보내기 형식", initiallyExpanded = true) {
+            SAccordion(title = "Supported Export Formats", initiallyExpanded = true) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     SParagraphMediumText(
-                        text = "1. PDF (다중 페이지 병합 지원)",
+                        text = "1. PDF (Multi-page merge supported)",
                         color = Theme.colorScheme.secondaryText
                     )
                     SParagraphMediumText(
-                        text = "2. JPEG (압축률 설정 가능)",
+                        text = "2. JPEG (Adjustable compression)",
                         color = Theme.colorScheme.secondaryText
                     )
                     SParagraphMediumText(
-                        text = "3. TXT (OCR 텍스트 인식 추출본)",
+                        text = "3. TXT (OCR text extraction)",
                         color = Theme.colorScheme.secondaryText
                     )
                 }

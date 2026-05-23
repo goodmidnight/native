@@ -34,12 +34,12 @@ namespace native_scanner {
         }
 
         const double total_area = edged.cols * edged.rows;
-        const double max_area_ratio = 0.92; // 프리뷰 전체 범위를 문서로 감지하는 오인식 상한선
+        const double max_area_ratio = 0.92; // Upper bound to reject false detection of entire preview area
         std::vector<ContourCandidate> candidates;
 
         for (const auto &contour: contours) {
             double area = cv::contourArea(contour);
-            // 너무 작거나 혹은 전체 화면 크기의 대부분을 덮어버리는 컨투어 필터링
+            // Filter out contours that are too small or cover most of the screen
             if (area < (total_area * min_area_ratio) || area > (total_area * max_area_ratio)) {
                 continue;
             }
@@ -54,7 +54,7 @@ namespace native_scanner {
         float max_dist_from_center = cv::norm(image_center); // Center to corner (0,0)
 
         for (auto& candidate : candidates) {
-            // 1. 볼록 껍질(Convex Hull)을 생성하여 자잘한 노이즈로 파인 엣지 라인을 매끄럽게 채움
+            // 1. Generate convex hull to smooth jagged edges caused by noise
             std::vector<cv::Point> hull;
             cv::convexHull(candidate.contour, hull);
 
@@ -68,7 +68,7 @@ namespace native_scanner {
             if (approx.size() == 4) {
                 square_score = 1.0;
             } else if (approx.size() > 4) {
-                // 2. 꼭짓점이 4개 이상(5~8개)일 때, 네 귀퉁이 극점(Extreme Points)을 추출해 사각형으로 단순화
+                // 2. When vertex count is 4+ (5~8), extract four extreme corner points to simplify into a quadrilateral
                 std::vector<cv::Point> extreme_pts(4);
                 int tl_idx = 0, tr_idx = 0, br_idx = 0, bl_idx = 0;
                 float min_sum = FLT_MAX, max_sum = -FLT_MAX;
@@ -89,7 +89,7 @@ namespace native_scanner {
                 extreme_pts[2] = approx[br_idx];
                 extreme_pts[3] = approx[bl_idx];
 
-                // 추출한 4개 귀퉁이 꼭짓점 간 중복 검사
+                // Check for duplicate vertices among the 4 extracted corner points
                 bool duplicates = false;
                 for (int i = 0; i < 4; ++i) {
                     for (int j = i + 1; j < 4; ++j) {
@@ -102,14 +102,14 @@ namespace native_scanner {
 
                 if (!duplicates) {
                     final_quad_points = extreme_pts;
-                    // 완벽한 사각형이 아니더라도 검출되도록 허용하되, 약한 감점(0.75) 부여
+                    // Allow detection even if not a perfect quadrilateral, with a mild penalty (0.75)
                     square_score = 0.75;
                 } else {
                     square_score = 0.0;
                 }
             }
 
-            // 3. 화면 테두리 밀착 검출 제거 (오인식 차단 필터)
+            // 3. Remove detections touching screen borders (false positive filter)
             if (square_score > 0.0 && final_quad_points.size() == 4) {
                 int margin = 3;
                 int border_touch_count = 0;
@@ -120,7 +120,7 @@ namespace native_scanner {
                     }
                 }
                 if (border_touch_count >= 3) {
-                    square_score = 0.0; // 프리뷰 테두리를 에지로 잘못 잡은 상태
+                    square_score = 0.0; // Falsely detected preview border as an edge
                 }
             }
 
@@ -136,7 +136,7 @@ namespace native_scanner {
                 centrality_score = std::max(0.0, 1.0 - (dist / max_dist_from_center));
             }
 
-            // 5. 문서 유형별 이상적인 종횡비(Aspect Ratio)를 기반으로 한 적응형 가중치 점수 도입
+            // 5. Adaptive aspect ratio scoring based on ideal ratios per document type
             double aspect_ratio_score = 0.0;
             if (square_score > 0.0 && final_quad_points.size() == 4) {
                 double d01 = cv::norm(final_quad_points[0] - final_quad_points[1]);
@@ -157,17 +157,17 @@ namespace native_scanner {
                         ideal_min = 1.2; // A4 (1.414)
                         ideal_max = 1.8;
                     } else if (type == DocumentType::ID_CARD || type == DocumentType::BUSINESS_CARD) {
-                        ideal_min = 1.4; // 신용카드(1.586), 명함(1.8)
+                        ideal_min = 1.4; // Credit card (1.586), business card (1.8)
                         ideal_max = 2.1;
                     } else if (type == DocumentType::RECEIPT) {
-                        ideal_min = 1.5; // 가로가 매우 좁고 긴 영수증까지 허용
+                        ideal_min = 1.5; // Allow very narrow and long receipts
                         ideal_max = 6.0;
                     }
 
                     if (norm_ratio >= ideal_min && norm_ratio <= ideal_max) {
                         aspect_ratio_score = 1.0;
                     } else {
-                        // 범위를 이탈할수록 점수가 감소하도록 감쇠 공식 부여
+                        // Apply decay formula so score decreases as ratio deviates from ideal range
                         double diff = 0.0;
                         if (norm_ratio < ideal_min) diff = ideal_min - norm_ratio;
                         else diff = norm_ratio - ideal_max;
@@ -176,7 +176,7 @@ namespace native_scanner {
                 }
             }
 
-            // 가중치 조합 점수: 단순 면적 비중을 다소 낮추고, 형태 및 중앙 정렬 비중을 높임
+            // Weighted composite score: lower weight on raw area, higher on shape and centrality
             candidate.score = (square_score * 0.3) +
                               (convexity_score * 0.15) +
                               (centrality_score * 0.2) +
@@ -187,7 +187,7 @@ namespace native_scanner {
         std::sort(candidates.begin(), candidates.end(), std::greater<ContourCandidate>());
         ContourCandidate best_candidate = candidates[0];
 
-        // 1등 후보에 대해 동일하게 극점 기법을 활용한 4각형 추출 수행
+        // Extract quadrilateral from the top candidate using the same extreme point technique
         std::vector<cv::Point> best_hull;
         cv::convexHull(best_candidate.contour, best_hull);
 

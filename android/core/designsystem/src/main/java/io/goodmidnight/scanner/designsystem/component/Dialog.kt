@@ -136,10 +136,10 @@ fun SConfirmDialog(
 fun SConfirmDialogPreview() {
     Theme {
         SConfirmDialog(
-            title = "작업 승인",
-            message = "이 설정을 적용하면 기존 디자인시스템이 우버 스타일 모노톤으로 전면 개편됩니다. 진행할까요?",
-            confirmText = "승인하기",
-            dismissText = "돌아가기",
+            title = "Confirm Action",
+            message = "Applying this setting will overhaul the existing design system to a monotone style. Proceed?",
+            confirmText = "Confirm",
+            dismissText = "Go Back",
             onConfirm = {},
             onDismissRequest = {}
         )

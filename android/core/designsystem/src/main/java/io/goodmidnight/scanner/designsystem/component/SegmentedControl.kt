@@ -115,7 +115,7 @@ fun SSegmentedControlPreview() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             SSegmentedControl(
-                segments = listOf("스캔 모드", "가져오기", "클라우드"),
+                segments = listOf("Scan Mode", "Import", "Cloud"),
                 selectedIndex = selectedIndex1,
                 onSegmentSelected = { selectedIndex1 = it }
             )
@@ -123,7 +123,7 @@ fun SSegmentedControlPreview() {
             Box(modifier = Modifier.height(20.dp))
 
             SSegmentedControl(
-                segments = listOf("PDF 형식", "이미지"),
+                segments = listOf("PDF Format", "Image"),
                 selectedIndex = selectedIndex2,
                 onSegmentSelected = { selectedIndex2 = it }
             )

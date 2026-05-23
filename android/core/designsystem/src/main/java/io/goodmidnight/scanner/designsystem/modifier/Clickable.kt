@@ -29,7 +29,7 @@ import kotlin.coroutines.CoroutineContext
 
 /**
  * [bounceClick]
- * - 클릭 가능한 요소에 눌렸을 때 크기가 살짝 줄어드는(scale: 0.96) 부드러운 피드백 애니메이션을 적용합니다.
+ * - Applies a soft bounce feedback animation that slightly scales down (0.96) clickable elements when pressed.
  */
 fun Modifier.bounceClick(
     enabled: Boolean = true,
@@ -52,7 +52,7 @@ fun Modifier.bounceClick(
             if (onClick != null) {
                 this.throttleClickable(
                     interactionSource = interactionSource,
-                    indication = null, // 리플 비활성화하고 바운스 애니메이션만 깔끔하게 전달
+                    indication = null, // Disable ripple; deliver only the clean bounce animation
                     enabled = enabled,
                     onClick = onClick
                 )
@@ -64,8 +64,8 @@ fun Modifier.bounceClick(
 
 /**
  * [softShadow]
- * - 강한 실선을 지양하고, 우버 디자인 시스템 고유의 아주 은은하고 넓게 퍼지는 그림자를 렌더링합니다.
- * - 예시: color: #000, opacity: 0.03, blur: 20px
+ * - Avoids hard outlines; renders the subtle, wide-spreading shadow characteristic of the design system.
+ * - Example: color: #000, opacity: 0.03, blur: 20px
  */
 fun Modifier.softShadow(
     color: Color = Color.Black,
@@ -83,7 +83,7 @@ fun Modifier.softShadow(
         val frameworkPaint = paint.asFrameworkPaint()
         frameworkPaint.color = transparentColor
 
-        // 하드웨어 가속 섀도우 적용 (shadowRadius, dx, dy, color)
+        // Apply hardware-accelerated shadow (shadowRadius, dx, dy, color)
         frameworkPaint.setShadowLayer(
             shadowRadius.toPx(),
             offsetX.toPx(),
@@ -105,7 +105,7 @@ fun Modifier.softShadow(
 
 /**
  * [throttleClickable]
- * - 클릭 인터렉션이 연속적으로 발생하는 것을 방지하는 확장자
+ * - Extension that prevents rapid successive click interactions
  */
 @SuppressLint("ModifierFactoryUnreferencedReceiver")
 fun Modifier.throttleClickable(
@@ -137,7 +137,7 @@ fun Modifier.throttleClickable(
 
 /**
  * [throttleClickable]
- * - 클릭 인터렉션이 연속적으로 발생하는 것을 방지하는 확장자 (interactionSource 지정)
+ * - Extension that prevents rapid successive click interactions (with interactionSource)
  */
 fun Modifier.throttleClickable(
     interactionSource: MutableInteractionSource = MutableInteractionSource(),
@@ -171,7 +171,7 @@ fun Modifier.throttleClickable(
 }
 
 /**
- * 클릭 인터렉션 중 기본적으로 발생하는 시각 이펙트를 제거하는 확장자
+ * Extension that removes default visual effects during click interactions
  */
 @SuppressLint("ModifierFactoryUnreferencedReceiver")
 fun Modifier.noRippleClickable(

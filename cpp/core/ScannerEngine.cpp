@@ -63,13 +63,13 @@ namespace native_scanner {
                     max_distance = std::max(max_distance, dist);
                 }
 
-                if (max_distance < 25.0f) { // 안정성 검사 임계값 상향
+                if (max_distance < 25.0f) { // Raised stability check threshold
                     stable_frame_count_++;
                 } else {
                     stable_frame_count_ = 0;
                 }
 
-                if (stable_frame_count_ >= 2) { // 안정성 카운트 조건 완화
+                if (stable_frame_count_ >= 2) { // Relaxed stability count condition
                     frame.is_stable = true;
                     if (logger_) logger_(LogLevel::DEBUG, "Frame is stable.");
                 }
@@ -77,7 +77,7 @@ namespace native_scanner {
                 stable_frame_count_ = 0;
             }
 
-            frame.points = GeometryUtils::smoothPoints(prev_points_, frame.points, 0.5f); // 스무딩 팩터 증가
+            frame.points = GeometryUtils::smoothPoints(prev_points_, frame.points, 0.5f); // Increased smoothing factor
             prev_points_ = frame.points;
 
             float inv_scale = 1.0f / scale;

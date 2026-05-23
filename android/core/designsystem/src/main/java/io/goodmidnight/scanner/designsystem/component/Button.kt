@@ -65,7 +65,7 @@ fun SButton(
             .background(backgroundColor)
             .then(borderModifier)
             .bounceClick(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 28.dp, vertical = 14.dp), // Spacing: 충분한 여백 확보
+            .padding(horizontal = 28.dp, vertical = 14.dp), // Spacing: ensure sufficient padding
         contentAlignment = Alignment.Center
     ) {
         Row(

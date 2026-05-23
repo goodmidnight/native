@@ -17,7 +17,7 @@ using namespace native_scanner;
 #define LOG_TAG "NativeScanner"
 
 // ============================================================================
-// 전역 참조 및 변수 (Global Reference Cache) - 리플렉션 오버헤드 제거
+// Global Reference Cache - Eliminates reflection overhead
 // ============================================================================
 JavaVM* g_vm = nullptr;
 
@@ -34,7 +34,7 @@ jmethodID g_BitmapCreateMethod = nullptr;
 jobject g_BitmapConfigArgb8888 = nullptr;
 
 // ============================================================================
-// JNI 생명주기 관리
+// JNI Lifecycle Management
 // ============================================================================
 extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
     g_vm = vm;
@@ -43,12 +43,12 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
         return JNI_ERR;
     }
 
-    // [수정 포인트 1] 실제 코틀린 클래스가 존재하는 정확한 패키지 경로로 변경해야 합니다.
-    // 만약 domain.model 패키지에 있다면 아래와 같이 적어야 합니다. (슬래시 / 로 구분)
+    // [NOTE] Must match the exact package path where the Kotlin class resides.
+    // Use slash (/) as separator if the class is in a different package (e.g., domain.model).
     const char* frameClassName = "io/goodmidnight/scanner/model/DocumentFrame";
     const char* resultClassName = "io/goodmidnight/scanner/model/CaptureResult";
 
-    // 1. DocumentFrame 캐싱 및 방어 로직
+    // 1. DocumentFrame caching and validation
     jclass localFrameCls = env->FindClass(frameClassName);
     if (!localFrameCls) {
         env->ExceptionDescribe();
@@ -61,7 +61,7 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
     g_FramePointsField = env->GetFieldID(g_DocumentFrameClass, "points", "[F");
     env->DeleteLocalRef(localFrameCls);
 
-    // 2. CaptureResult 캐싱 및 방어 로직
+    // 2. CaptureResult caching and validation
     jclass localResultCls = env->FindClass(resultClassName);
     if (!localResultCls) {
         env->ExceptionDescribe();
@@ -72,7 +72,7 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
     g_CaptureResultConstructor = env->GetMethodID(g_CaptureResultClass, "<init>", "(Landroid/graphics/Bitmap;IZZLjava/lang/String;)V");
     env->DeleteLocalRef(localResultCls);
 
-    // 3. Android Bitmap 및 Config 캐싱
+    // 3. Android Bitmap and Config caching
     jclass localBitmapCls = env->FindClass("android/graphics/Bitmap");
     if (!localBitmapCls) {
         env->ExceptionClear();
@@ -104,7 +104,7 @@ extern "C" JNIEXPORT void JNICALL JNI_OnUnload(JavaVM* vm, void* reserved) {
 }
 
 // ============================================================================
-// 유틸리티 함수
+// Utility Functions
 // ============================================================================
 
 ScannerConfig extractConfig(JNIEnv* env, jobject jconfig) {
@@ -159,7 +159,7 @@ jobject matToBitmap(JNIEnv* env, const cv::Mat& src) {
 }
 
 // ============================================================================
-// JNI 진입점 함수
+// JNI Entry Point Functions
 // ============================================================================
 
 extern "C" JNIEXPORT jlong JNICALL
@@ -186,7 +186,7 @@ JNI_METHOD(nativeRelease)(JNIEnv* env, jobject thiz, jlong ptr) {
 }
 
 /**
- * @brief C++ 엔진에 안드로이드 로거를 콜백으로 등록합니다.
+ * @brief Registers an Android logger callback with the C++ engine.
  */
 extern "C" JNIEXPORT void JNICALL
 JNI_METHOD(nativeSetLogger)(JNIEnv* env, jobject thiz, jlong ptr) {

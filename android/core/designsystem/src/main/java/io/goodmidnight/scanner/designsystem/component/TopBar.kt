@@ -152,7 +152,7 @@ fun SSearchTopBar(
 fun STitleTopBarPreview() {
     Theme {
         STitleTopBar(
-            title = "문서 편집",
+            title = "Edit Document",
             onBack = {}
         )
     }
@@ -163,7 +163,7 @@ fun STitleTopBarPreview() {
 fun SMainTopBarPreview() {
     Theme {
         SMainTopBar(
-            title = "보관함"
+            title = "Library"
         )
     }
 }

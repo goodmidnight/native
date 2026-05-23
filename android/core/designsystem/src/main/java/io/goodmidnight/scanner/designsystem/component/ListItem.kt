@@ -86,7 +86,7 @@ fun SListItem(
 
         if (showDivider) {
             Spacer(modifier = Modifier.height(14.dp))
-            // M3 HorizontalDivider 대체 독자 드로잉 분리선
+            // Custom-drawn divider replacing M3 HorizontalDivider
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -108,8 +108,8 @@ fun SListItemPreview() {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             SListItem(
-                headline = "자동 스캔 활성화",
-                supportingContent = "카메라에 문서가 탐지되면 자동으로 캡처합니다.",
+                headline = "Enable Auto Scan",
+                supportingContent = "Automatically captures when a document is detected by the camera.",
                 onClick = {},
                 trailingContent = {
                     SToggleSwitch(checked = true, onCheckedChange = {})
@@ -117,16 +117,16 @@ fun SListItemPreview() {
             )
 
             SListItem(
-                headline = "PDF 내보내기 품질",
-                supportingContent = "고화질 (300 DPI)",
+                headline = "PDF Export Quality",
+                supportingContent = "High Quality (300 DPI)",
                 onClick = {},
                 trailingContent = {
-                    SLabelMediumText("변경하기", color = Theme.colorScheme.accent)
+                    SLabelMediumText("Change", color = Theme.colorScheme.accent)
                 }
             )
 
             SListItem(
-                headline = "알림 설정",
+                headline = "Notification Settings",
                 showDivider = false,
                 onClick = {}
             )

@@ -78,7 +78,7 @@ fun SStepper(
         ) {
             SIcon(
                 imageVector = Icons.Remove,
-                contentDescription = "감소",
+                contentDescription = "Decrease",
                 tint = if (canDecrement) Theme.colorScheme.primaryText else Theme.colorScheme.disabledText,
                 modifier = Modifier.size(18.dp)
             )
@@ -111,7 +111,7 @@ fun SStepper(
         ) {
             SIcon(
                 imageVector = Icons.Add,
-                contentDescription = "증가",
+                contentDescription = "Increase",
                 tint = if (canIncrement) Theme.colorScheme.primaryText else Theme.colorScheme.disabledText,
                 modifier = Modifier.size(18.dp)
             )

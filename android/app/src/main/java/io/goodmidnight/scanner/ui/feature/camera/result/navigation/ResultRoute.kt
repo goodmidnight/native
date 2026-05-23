@@ -64,7 +64,7 @@ fun ResultRoute(
                     saveImage
                 }
                 withContext(Dispatchers.Main) {
-                    snackbarHostState.showSnackbarImmediately(coroutineScope, "이미지가 JPEG 파일로 저장되었습니다.")
+                    snackbarHostState.showSnackbarImmediately(coroutineScope, "Image saved as JPEG.")
                 }
             }
         }
@@ -80,7 +80,7 @@ fun ResultRoute(
                     viewModel.documentSaveController.saveImage(bitmap, outputStream, SaveFormat.PNG)
                 }
                 withContext(Dispatchers.Main) {
-                    snackbarHostState.showSnackbarImmediately(coroutineScope, "이미지가 PNG 파일로 저장되었습니다.")
+                    snackbarHostState.showSnackbarImmediately(coroutineScope, "Image saved as PNG.")
                 }
             }
         }
@@ -96,7 +96,7 @@ fun ResultRoute(
                     viewModel.documentSaveController.saveAsPdf(bitmap, outputStream, "scanned_doc")
                 }
                 withContext(Dispatchers.Main) {
-                    snackbarHostState.showSnackbarImmediately(coroutineScope, "문서가 PDF 파일로 저장되었습니다.")
+                    snackbarHostState.showSnackbarImmediately(coroutineScope, "Document saved as PDF.")
                 }
             }
         }

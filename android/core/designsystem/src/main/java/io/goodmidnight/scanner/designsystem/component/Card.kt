@@ -72,7 +72,7 @@ fun SCardPreview() {
                 content = {
                     Column(modifier = Modifier.padding(20.dp)) {
                         SHeadingMediumText("Primary Card")
-                        SParagraphMediumText("눈에 피로가 가지 않는 부드러운 화이트 표면과 아주 은은하고 투명한 그림자를 제공합니다.")
+                        SParagraphMediumText("Provides a soft white surface that is easy on the eyes with subtle, transparent shadows.")
                     }
                 }
             )
@@ -82,7 +82,7 @@ fun SCardPreview() {
                 content = {
                     Column(modifier = Modifier.padding(20.dp)) {
                         SHeadingMediumText("Outline Card")
-                        SParagraphMediumText("구분이 명확해야 하는 영역을 위해 얇고 연한 구분선을 함께 렌더링한 형태입니다.")
+                        SParagraphMediumText("Renders thin, subtle dividers for areas that require clear visual separation.")
                     }
                 }
             )

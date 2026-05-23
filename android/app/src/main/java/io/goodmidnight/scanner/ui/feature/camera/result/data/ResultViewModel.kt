@@ -33,7 +33,7 @@ class ResultViewModel @Inject constructor(
     }
 
     private suspend fun showCopySuccessMessage() {
-        emitEffect(ResultEffect.ShowSnackBar("복사되었습니다."))
+        emitEffect(ResultEffect.ShowSnackBar("Copied to clipboard."))
     }
 
     private suspend fun back() {

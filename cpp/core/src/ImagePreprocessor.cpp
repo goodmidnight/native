@@ -87,7 +87,7 @@ namespace native_scanner {
             gray = src.clone();
         }
 
-        // 1. 자동 저조도 감지 로직
+        // 1. Auto low-light detection
         double avg_brightness = cv::mean(gray)[0];
         if (!applied_low_light && avg_brightness < 80.0) {
             applied_low_light = true;
@@ -96,20 +96,20 @@ namespace native_scanner {
                 applyLowLightEnhancement(src, enhanced);
                 cv::cvtColor(enhanced, gray, cv::COLOR_BGR2GRAY);
             }
-            // 어두운 환경이므로 Canny 에지 검출 감도를 높이기 위해 canny_sigma 임계값 간격을 다이내믹하게 보정
+            // Dark environment: dynamically adjust canny_sigma to increase Canny edge detection sensitivity
             canny_sigma *= 0.75f;
         }
 
-        // 2. 문서 유형별 샤프닝(Sharpening) 필터 커스터마이징
+        // 2. Document type-specific sharpening filter customization
         cv::Mat sharpening_kernel;
         if (type == DocumentType::ID_CARD || type == DocumentType::BUSINESS_CARD) {
-            // 신분증이나 명함은 작은 텍스트와 세밀한 경계선 대비가 더 중요하므로 샤프닝을 다소 강화
+            // ID cards and business cards require stronger sharpening for small text and fine edge contrast
             sharpening_kernel = (cv::Mat_<float>(3, 3) <<
                  0, -1.2f,  0,
               -1.2f,  5.8f, -1.2f,
                  0, -1.2f,  0);
         } else {
-            // 일반 문서 및 영수증 표준 샤프닝
+            // Standard sharpening for general documents and receipts
             sharpening_kernel = (cv::Mat_<float>(3, 3) <<
                  0, -1.f,  0,
                 -1.f,  5.f, -1.f,
@@ -117,7 +117,7 @@ namespace native_scanner {
         }
         cv::filter2D(gray, gray, gray.depth(), sharpening_kernel);
 
-        // 3. 동적 블러(Blur) 생략/조율 임계값 커스터마이징
+        // 3. Dynamic blur skip/threshold customization per document type
         cv::Mat laplacian, mean, stddev;
         cv::Laplacian(gray, laplacian, CV_64F);
         cv::meanStdDev(laplacian, mean, stddev);
@@ -126,29 +126,29 @@ namespace native_scanner {
         cv::Mat blurred;
         double blur_threshold = 150.0;
         if (type == DocumentType::ID_CARD || type == DocumentType::BUSINESS_CARD) {
-            // 신분증의 정교한 에지가 번지는 것을 적극 방지하기 위해 블러 적용 기준을 다소 높여 제한적으로 블러링 적용
+            // Raise blur threshold for ID cards to prevent fine edges from smearing
             blur_threshold = 220.0;
         }
 
         if (variance > blur_threshold) {
-            // 충분히 선명할 때만 노이즈 제거용 블러 적용
+            // Apply noise-reduction blur only when image is sharp enough
             int k_size = custom_blur_size;
             if ((type == DocumentType::ID_CARD || type == DocumentType::BUSINESS_CARD) && k_size <= 0) {
                 k_size = (gray.cols / 300) | 1;
             }
             applyDynamicBlur(gray, blurred, k_size);
         } else {
-            // 흐릿한 경우 블러 연산을 건너뛰어 추가 픽셀 손실 방지
+            // Skip blur when image is already blurry to prevent further pixel loss
             blurred = gray;
         }
 
-        // 4. 고도화된 Adaptive Canny 알고리즘 적용
+        // 4. Apply advanced adaptive Canny algorithm
         applyAdaptiveCanny(blurred, dst, canny_sigma);
 
-        // 5. 문서 유형별 모폴로지 닫기(Close) 커널 크기 조율
+        // 5. Morphological close kernel size tuning per document type
         int morph_size = 5;
         if (type == DocumentType::RECEIPT) {
-            // 영수증은 빽빽한 텍스트 및 용지 주름 등으로 인해 엣지가 파편화되기 쉬우므로 7x7로 상향하여 엣지 연결성 강화
+            // Receipts have dense text and paper wrinkles that fragment edges; use 7x7 kernel to strengthen edge connectivity
             morph_size = 7;
         }
 
@@ -158,25 +158,25 @@ namespace native_scanner {
 
     void ImagePreprocessor::removeShadows(const cv::Mat &src, cv::Mat &dst) {
         if (src.channels() != 1) {
-            // 그림자 제거는 그레이스케일 이미지에 적용해야 최적의 결과를 얻습니다.
+            // Shadow removal should be applied to grayscale images for optimal results.
             cv::cvtColor(src, dst, cv::COLOR_BGR2GRAY);
         } else {
             dst = src.clone();
         }
 
-        // 1. 이미지의 전반적인 조명 패턴(배경)을 추정합니다.
-        // medianBlur를 큰 커널 사이즈로 적용하여 텍스트 같은 작은 디테일을 모두 제거하고,
-        // 그림자로 인해 어두워진 넓은 영역만 남깁니다.
+        // 1. Estimate the overall illumination pattern (background) of the image.
+        // Apply medianBlur with a large kernel to remove small details like text,
+        // leaving only the broad darkened areas caused by shadows.
         cv::Mat background;
-        int kernel_size = static_cast<int>(dst.cols / 8) | 1; // 이미지 너비에 비례하는 동적 커널 사이즈
+        int kernel_size = static_cast<int>(dst.cols / 8) | 1; // Dynamic kernel size proportional to image width
         cv::medianBlur(dst, background, kernel_size);
 
-        // 2. 원본 이미지와 배경 이미지의 차이를 계산하여 조명을 균일하게 만듭니다.
-        // cv::absdiff 대신 255를 더한 후 나누는 방식을 사용하여 더욱 자연스러운 결과를 얻습니다.
-        // (이 방식은 조명 불균일성 보정에 널리 사용됩니다)
+        // 2. Calculate the difference between the original and background images to normalize illumination.
+        // Instead of cv::absdiff, use 255 - (background - original) for more natural results.
+        // (This method is widely used for illumination non-uniformity correction)
         cv::Mat result = 255 - (background - dst);
 
-        // 3. 처리된 이미지가 너무 어두워지는 것을 방지하기 위해 밝기를 정규화합니다.
+        // 3. Normalize brightness to prevent the processed image from becoming too dark.
         cv::normalize(result, dst, 0, 255, cv::NORM_MINMAX);
     }
 }

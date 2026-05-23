@@ -152,8 +152,8 @@ fun SNavigationBarPreview() {
         ) {
             SNavigationBar(
                 items = listOf(
-                    NavigationItem("library", "보관함", Icons.Library, "library"),
-                    NavigationItem("menu", "메뉴", Icons.Menu, "menu")
+                    NavigationItem("library", "Library", Icons.Library, "library"),
+                    NavigationItem("menu", "Menu", Icons.Menu, "menu")
                 ),
                 currentRoute = "scan",
                 onItemClick = {}

@@ -246,7 +246,7 @@ class CameraController @Inject constructor(
                     val rotation = image.imageInfo.rotationDegrees
                     val bitmap = imageProxyToBitmap(image)
                     
-                    // 회전 정보를 바탕으로 비트맵을 물리적으로 회전시킴
+                    // Physically rotate the bitmap based on rotation info
                     val rotatedBitmap = if (rotation != 0) {
                         rotateBitmap(bitmap, rotation.toFloat())
                     } else {
@@ -257,7 +257,7 @@ class CameraController @Inject constructor(
                         _cameraSideEffect.emit(
                             CameraEffect.SendCapturedImage(
                                 rotatedBitmap,
-                                0, // 이미 회전됨
+                                0, // Already rotated
                                 processingMode,
                             )
                         )

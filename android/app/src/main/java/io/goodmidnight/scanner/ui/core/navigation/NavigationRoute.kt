@@ -2,18 +2,18 @@ package io.goodmidnight.scanner.ui.core.navigation
 
 /**
  * [NavigationRoute]
- * - 네비게이션을 정의하는 라우트
- * @property destinationRoute 네비게이션 목적지 경로
+ * - Defines a navigation route.
+ * @property destinationRoute The destination path for navigation.
  */
 interface NavigationRoute {
     val destinationRoute: String
 
     /**
      * [buildNavigationRoute]
-     * - 해당 목적지에 대한 네비게이션 라우트 구성
-     * - 별도 파라미터가 존재할 경우 목적지에 쿼리 스트링을 이어 붙임
-     * @param route 경로
-     * @param args 파라미터 key value 집합
+     * - Constructs a navigation route for the given destination.
+     * - Appends query string parameters to the destination if any are provided.
+     * @param route The destination path.
+     * @param args A collection of key-value parameter pairs.
      */
     fun buildNavigationRoute(route: String, vararg args: Pair<String, String>) =
         route + (args.takeIf { it.isNotEmpty() }?.let { "?" + args.joinToString("&") { "${it.first}=${it.second}" } }

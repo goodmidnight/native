@@ -60,7 +60,7 @@ fun SSnackbarComponent(
 fun SSnackbarPreview() {
     Theme {
         SSnackbarComponent(
-            message = "사진이 문서 보관함에 안전하게 저장되었습니다."
+            message = "Photo has been safely saved to the document library."
         )
     }
 }

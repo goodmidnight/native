@@ -159,17 +159,17 @@ fun SChipsPreview() {
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SChip(
-                    text = "선택됨",
+                    text = "Selected",
                     selected = selectedChip1,
                     onClick = { selectedChip1 = !selectedChip1 }
                 )
                 SChip(
-                    text = "선택 안됨",
+                    text = "Unselected",
                     selected = selectedChip2,
                     onClick = { selectedChip2 = !selectedChip2 }
                 )
                 SChip(
-                    text = "비활성화",
+                    text = "Disabled",
                     selected = false,
                     enabled = false,
                     onClick = {}
@@ -178,13 +178,13 @@ fun SChipsPreview() {
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SFilterChip(
-                    text = "최신순",
+                    text = "Latest",
                     trailingIcon = Icons.ArrowDropUp,
                     selected = selectedChip1,
                     onClick = { selectedChip1 = !selectedChip1 }
                 )
                 SFilterChip(
-                    text = "인기순",
+                    text = "Popular",
                     trailingIcon = Icons.ArrowDropDown,
                     selected = selectedChip2,
                     onClick = { selectedChip2 = !selectedChip2 }

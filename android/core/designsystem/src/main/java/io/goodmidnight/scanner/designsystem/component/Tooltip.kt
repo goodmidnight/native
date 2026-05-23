@@ -112,7 +112,7 @@ fun STooltipPreview() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             STooltip(
-                text = "여기를 길게 누르면 수동 촬영 모드로 변경됩니다",
+                text = "Long press here to switch to manual capture mode",
                 direction = TooltipDirection.Top,
                 visible = true
             )
@@ -120,7 +120,7 @@ fun STooltipPreview() {
             Spacer(modifier = Modifier.height(24.dp))
 
             STooltip(
-                text = "스캔 경계 정밀 보정 팁",
+                text = "Scan boundary fine-tuning tip",
                 direction = TooltipDirection.Bottom,
                 visible = true
             )

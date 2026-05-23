@@ -31,8 +31,8 @@ import io.goodmidnight.scanner.designsystem.preview.ComponentPreview
 
 /**
  * [SCheckBox]
- * - Material 3 CheckBox에 의존하지 않고 Box 기반으로 직접 구현한 둥근 사각형 다중 선택 체크박스입니다.
- * - 체크 선택 시 내측 체크 마크가 톡 튀어오르는 [scale] 애니메이션과 클릭 시 [bounceClick] 효과를 내장합니다.
+ * - A rounded-rectangle multi-select checkbox built directly with Box, without depending on Material 3 CheckBox.
+ * - Features a pop [scale] animation on checkmark activation and a [bounceClick] effect on tap.
  */
 @Composable
 fun SCheckBox(
@@ -43,7 +43,7 @@ fun SCheckBox(
 ) {
     val checkboxShape = RoundedCornerShape(6.dp)
 
-    // 선택 여부에 따른 배경색 및 테두리색 스무스 트랜지션
+    // Smooth transition of background and border colors based on selection state
     val backgroundColor by animateColorAsState(
         targetValue = when {
             !enabled -> Theme.colorScheme.outlineVariant.copy(alpha = 0.5f)
@@ -62,7 +62,7 @@ fun SCheckBox(
         label = "CheckBoxBorderColor"
     )
 
-    // 체크마크가 활성화될 때 톡 튀어나오는 스케일 효과
+    // Pop scale effect when the checkmark activates
     val checkMarkScale by animateFloatAsState(
         targetValue = if (checked) 1.0f else 0.0f,
         label = "CheckBoxMarkScale"
@@ -104,19 +104,19 @@ fun SCheckBoxPreview() {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 SCheckBox(checked = checked1, onCheckedChange = { checked1 = it })
                 Spacer(modifier = Modifier.width(10.dp))
-                SParagraphMediumText("선택된 체크박스")
+                SParagraphMediumText("Selected checkbox")
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 SCheckBox(checked = checked2, onCheckedChange = { checked2 = it })
                 Spacer(modifier = Modifier.width(10.dp))
-                SParagraphMediumText("선택 해제된 체크박스")
+                SParagraphMediumText("Deselected checkbox")
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 SCheckBox(checked = true, onCheckedChange = {}, enabled = false)
                 Spacer(modifier = Modifier.width(10.dp))
-                SParagraphMediumText("비활성화된 체크박스", color = Theme.colorScheme.disabledText)
+                SParagraphMediumText("Disabled checkbox", color = Theme.colorScheme.disabledText)
             }
         }
     }

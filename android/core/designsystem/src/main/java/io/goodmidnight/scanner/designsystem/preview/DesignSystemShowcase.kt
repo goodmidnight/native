@@ -75,15 +75,15 @@ import io.goodmidnight.scanner.designsystem.theme.Theme
 
 /**
  * [DesignSystemShowcase]
- * - 개편된 Soft Monotone 및 Uber 스타일 디자인시스템의 모든 컴포넌트, 컬러, 타이포그래피, 인터랙션을 총망라하여 보여주는 대통합 프리뷰 대시보드 화면입니다.
- * - 새로 추가 및 고도화된 9종의 컴포넌트(SCheckBox, SSegmentedControl, SProgressBar, SCircularProgress, SBadge, SListItem, SAvatar, SAccordion, STooltip, SStepper)가 전부 포함되어 실시간 테스트 가능합니다.
+ * - A comprehensive preview dashboard showcasing all components, colors, typography, and interactions of the Soft Monotone design system.
+ * - Includes all 9 new and enhanced components (SCheckBox, SSegmentedControl, SProgressBar, SCircularProgress, SBadge, SListItem, SAvatar, SAccordion, STooltip, SStepper) for live testing.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DesignSystemShowcase() {
     val scrollState = rememberScrollState()
 
-    // 대화형 테스트를 위한 기존 상태
+    // Existing state for interactive testing
     var buttonClickCount by remember { mutableStateOf(0) }
     var textInput by remember { mutableStateOf("") }
     var searchInput by remember { mutableStateOf("") }
@@ -93,7 +93,7 @@ fun DesignSystemShowcase() {
     var radioSelected by remember { mutableStateOf(true) }
     var sliderValue by remember { mutableFloatStateOf(1.0f) }
 
-    // 신규 & 추가 컴포넌트 대화형 상태
+    // New & additional component interactive state
     var checkboxChecked by remember { mutableStateOf(false) }
     var segmentedIndex by remember { mutableStateOf(0) }
     var progressVal by remember { mutableFloatStateOf(0.35f) }
@@ -102,7 +102,7 @@ fun DesignSystemShowcase() {
     var tooltipVisible by remember { mutableStateOf(true) }
     var avatarActive by remember { mutableStateOf(true) }
 
-    // 팝업 및 바텀시트 트리거 상태
+    // Popup and bottom sheet trigger state
     var showDialog by remember { mutableStateOf(false) }
     var showBottomSheet by remember { mutableStateOf(false) }
 
@@ -113,7 +113,7 @@ fun DesignSystemShowcase() {
             .verticalScroll(scrollState)
             .padding(bottom = 56.dp)
     ) {
-        // 탑바 프리뷰
+        // Top bar preview
         STitleTopBar(
             title = "Uber Monotone DS",
             onBack = {}
@@ -123,12 +123,12 @@ fun DesignSystemShowcase() {
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // 1. 컬러 팔레트 소개 카드
+            // 1. Color palette introduction card
             SHeadingXXLargeText(text = "1. Color Palette")
             SCard(style = CardStyle.PRIMARY) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     SParagraphMediumText(
-                        text = "완전한 블랙/화이트를 배제한 차분한 오프톤(Off-tone) 계열의 모노톤 팔레트입니다. 눈의 피로를 최소화하며, 극도로 정돈된 느낌을 줍니다.",
+                        text = "A calm, off-tone monotone palette that avoids pure black/white. Minimizes eye strain and delivers an extremely refined feel.",
                         color = Theme.colorScheme.secondaryText
                     )
 
@@ -145,24 +145,24 @@ fun DesignSystemShowcase() {
                 }
             }
 
-            // 2. 타이포그래피 소개 카드
+            // 2. Typography introduction card
             SHeadingXXLargeText(text = "2. Typography")
             SCard(style = CardStyle.PRIMARY) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     SDisplaySmallText(text = "Display Small (28sp)")
                     SHeadingXXLargeText(text = "Heading XXLarge (24sp)")
                     SHeadingMediumText(text = "Heading Medium (18sp)")
-                    SParagraphMediumText(text = "Paragraph Medium (14sp) - 가독성을 지향하는 본문 텍스트 렌더링입니다.")
-                    SLabelMediumText(text = "Label Medium (14sp) - 컨트롤 및 조작 계열 타이포그래피")
+                    SParagraphMediumText(text = "Paragraph Medium (14sp) - Body text rendering optimized for readability.")
+                    SLabelMediumText(text = "Label Medium (14sp) - Control and action typography")
                 }
             }
 
-            // 3. 버튼 및 칩
+            // 3. Buttons and chips
             SHeadingXXLargeText(text = "3. Buttons & Chips")
             SCard(style = CardStyle.PRIMARY) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     SParagraphMediumText(
-                        text = "모든 터치 가능 요소는 누르는 즉시 scale 0.96f로 쫀득하게 작아졌다가 돌아옵니다. 곡률은 24dp로 크게 적용되었습니다.",
+                        text = "All touchable elements scale down to 0.96f with a bouncy feel on press. Corner radius is set to a generous 24dp.",
                         color = Theme.colorScheme.secondaryText
                     )
 
@@ -198,7 +198,7 @@ fun DesignSystemShowcase() {
                             onClick = { chipSelected2 = !chipSelected2 }
                         )
                         SFilterChip(
-                            text = "최신순 필터",
+                            text = "Latest Filter",
                             trailingIcon = Icons.ArrowDropDown,
                             selected = chipSelected1,
                             onClick = { chipSelected1 = !chipSelected1 }
@@ -207,52 +207,52 @@ fun DesignSystemShowcase() {
                 }
             }
 
-            // 4. 입력창 (텍스트 필드)
+            // 4. Input fields (text fields)
             SHeadingXXLargeText(text = "4. Text Fields")
             SCard(style = CardStyle.PRIMARY) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
                     SUnderlineTextField(
                         value = textInput,
                         onValueChange = { textInput = it },
-                        placeHolder = "여기에 글자를 입력해보세요 (Underline)"
+                        placeHolder = "Type something here (Underline)"
                     )
 
                     SContainerTextField(
                         value = textInput,
                         onValueChange = { textInput = it },
-                        placeHolder = "24dp 곡률 및 은은한 그림자 입력창"
+                        placeHolder = "24dp radius with subtle shadow"
                     )
 
                     SSearchTextField(
                         value = searchInput,
                         onValueChange = { searchInput = it },
                         onSearch = {},
-                        placeHolder = "통통 튀는 검색 돋보기 필드"
+                        placeHolder = "Bouncy search magnifier field"
                     )
                 }
             }
 
-            // 5. 셀렉터 및 조작도구 고도화 (SCheckBox, SSegmentedControl, SStepper 등 신규 포함)
+            // 5. Selectors and controls (including SCheckBox, SSegmentedControl, SStepper)
             SHeadingXXLargeText(text = "5. Selectors & Steppers")
             SCard(style = CardStyle.PRIMARY) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                    // Segmented Control (스무스 좌우 슬라이딩)
+                    // Segmented Control (smooth horizontal sliding)
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        SLabelLargeText(text = "SSegmentedControl (스프링 썸 슬라이딩)")
+                        SLabelLargeText(text = "SSegmentedControl (spring thumb sliding)")
                         SSegmentedControl(
-                            segments = listOf("자동 스캔", "가져오기", "클라우드"),
+                            segments = listOf("Auto Scan", "Import", "Cloud"),
                             selectedIndex = segmentedIndex,
                             onSegmentSelected = { segmentedIndex = it }
                         )
                     }
 
-                    // 토글 스위치 및 라디오 버튼
+                    // Toggle switch and radio button
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        SLabelLargeText(text = "SToggleSwitch (알약 슬라이딩)")
+                        SLabelLargeText(text = "SToggleSwitch (pill sliding)")
                         SToggleSwitch(
                             checked = switchChecked,
                             onCheckedChange = { switchChecked = it }
@@ -264,33 +264,33 @@ fun DesignSystemShowcase() {
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        SLabelLargeText(text = "SRadioButton (원형 스케일 팽창)")
+                        SLabelLargeText(text = "SRadioButton (circle scale expansion)")
                         SRadioButton(
                             selected = radioSelected,
                             onClick = { radioSelected = !radioSelected }
                         )
                     }
 
-                    // CheckBox (둥근 사각 체크 팽창)
+                    // CheckBox (rounded square bounce check)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        SLabelLargeText(text = "SCheckBox (둥근 사각 바운스 체크)")
+                        SLabelLargeText(text = "SCheckBox (rounded bounce check)")
                         SCheckBox(
                             checked = checkboxChecked,
                             onCheckedChange = { checkboxChecked = it }
                         )
                     }
 
-                    // Stepper (통통 튀는 숫자 카운터)
+                    // Stepper (bouncy numeric counter)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        SLabelLargeText(text = "SStepper (수량 햅틱 팽창)")
+                        SLabelLargeText(text = "SStepper (quantity haptic bounce)")
                         SStepper(
                             value = stepperVal,
                             onValueChange = { stepperVal = it },
@@ -298,9 +298,9 @@ fun DesignSystemShowcase() {
                         )
                     }
 
-                    // Slider (정밀 드래그)
+                    // Slider (precision drag)
                     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        SLabelLargeText(text = "SSlider (커스텀 햅틱 제스처: ${String.format("%.1f", sliderValue)}x)")
+                        SLabelLargeText(text = "SSlider (custom haptic gesture: ${String.format("%.1f", sliderValue)}x)")
                         SSlider(
                             value = sliderValue,
                             onValueChange = { sliderValue = it },
@@ -311,26 +311,26 @@ fun DesignSystemShowcase() {
                 }
             }
 
-            // 6. 진행률 및 표시기 (SProgressBar, SCircularProgress, SBadge, SBadgeBox 포함)
+            // 6. Progress indicators (SProgressBar, SCircularProgress, SBadge, SBadgeBox)
             SHeadingXXLargeText(text = "6. Progress & Badges")
             SCard(style = CardStyle.PRIMARY) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                    // ProgressBar (진행률 조절 버튼과 연계)
+                    // ProgressBar (linked with progress control buttons)
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        SLabelLargeText(text = "SProgressBar (스무스 팽창 보간)")
+                        SLabelLargeText(text = "SProgressBar (smooth expansion interpolation)")
                         SProgressBar(progress = progressVal)
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             SButton(
-                                text = "진행률 20%",
+                                text = "Progress 20%",
                                 type = SButtonType.SECONDARY,
                                 onClick = { progressVal = 0.2f },
                                 modifier = Modifier.weight(1f)
                             )
                             SButton(
-                                text = "진행률 80%",
+                                text = "Progress 80%",
                                 type = SButtonType.SECONDARY,
                                 onClick = { progressVal = 0.8f },
                                 modifier = Modifier.weight(1f)
@@ -346,7 +346,7 @@ fun DesignSystemShowcase() {
                     ) {
                         Column {
                             SLabelLargeText(text = "SCircularProgress")
-                            SLabelSmallText(text = "무한 팽창 캔버스 로더", color = Theme.colorScheme.secondaryText)
+                            SLabelSmallText(text = "Infinite expansion canvas loader", color = Theme.colorScheme.secondaryText)
                         }
                         SCircularProgress()
                     }
@@ -358,13 +358,13 @@ fun DesignSystemShowcase() {
                     ) {
                         Column {
                             SLabelLargeText(text = "SBadge & SBadgeBox")
-                            SLabelSmallText(text = "숫자 변경 시 톡 튀는 스프링 배지", color = Theme.colorScheme.secondaryText)
+                            SLabelSmallText(text = "Spring badge that bounces on count change", color = Theme.colorScheme.secondaryText)
                         }
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            // 숫자 조절용 미니 버튼들
+                            // Mini buttons for adjusting count
                             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 SButton(
                                     text = "-",
@@ -391,7 +391,7 @@ fun DesignSystemShowcase() {
                                         .background(Theme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    SLabelMediumText("알림")
+                                    SLabelMediumText("Notifications")
                                 }
                             }
                         }
@@ -399,19 +399,19 @@ fun DesignSystemShowcase() {
                 }
             }
 
-            // 7. 레이아웃 및 접이식 콘텐츠 (SListItem, SAccordion, SAvatar 포함)
+            // 7. Layout and collapsible content (SListItem, SAccordion, SAvatar)
             SHeadingXXLargeText(text = "7. Lists, Avatars & Foldables")
             SCard(style = CardStyle.PRIMARY) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    // SAvatar 전시
+                    // SAvatar showcase
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            SLabelLargeText(text = "SAvatar (아바타 / 프로필)")
-                            SLabelSmallText(text = "스쿼클 펄싱 액티브 링 적용", color = Theme.colorScheme.secondaryText)
+                            SLabelLargeText(text = "SAvatar (avatar / profile)")
+                            SLabelSmallText(text = "Squircle pulsing active ring applied", color = Theme.colorScheme.secondaryText)
                         }
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -429,19 +429,19 @@ fun DesignSystemShowcase() {
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    // SListItem 설정창 예시
-                    SLabelLargeText(text = "SListItem (바운스 터치 행 레이아웃)")
+                    // SListItem settings example
+                    SLabelLargeText(text = "SListItem (bounce touch row layout)")
                     SListItem(
-                        headline = "자동 보정 필터 적용",
-                        supportingContent = "이미지 스캔 시 조명 불균형을 자동 해소합니다.",
+                        headline = "Apply Auto Correction Filter",
+                        supportingContent = "Automatically corrects lighting imbalance during image scanning.",
                         onClick = {},
                         trailingContent = {
                             SToggleSwitch(checked = true, onCheckedChange = {})
                         }
                     )
                     SListItem(
-                        headline = "사용자 프로필 설정",
-                        supportingContent = "계정 연동 상태: 활성",
+                        headline = "User Profile Settings",
+                        supportingContent = "Account link status: Active",
                         onClick = {},
                         showDivider = false,
                         leadingContent = {
@@ -451,32 +451,32 @@ fun DesignSystemShowcase() {
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    // SAccordion 접이식 예시
-                    SLabelLargeText(text = "SAccordion (스프링 슬라이딩 아코디언)")
-                    SAccordion(title = "고급 이미지 정밀 스캔 팁", initiallyExpanded = false) {
+                    // SAccordion collapsible example
+                    SLabelLargeText(text = "SAccordion (spring sliding accordion)")
+                    SAccordion(title = "Advanced Precision Scan Tips", initiallyExpanded = false) {
                         SParagraphMediumText(
-                            text = "1. 그림자가 지지 않도록 카메라 각도를 약간 비스듬하게 유지해도 자동 보정이 왜곡을 펴줍니다.\n" +
-                                    "2. 모노톤 명암비는 흑백 스캔 모드에서 텍스트를 가장 또렷하게 검출합니다.",
+                            text = "1. Even if you tilt the camera slightly to avoid shadows, auto-correction will fix the distortion.\n" +
+                                    "2. Monotone contrast detects text most clearly in black-and-white scan mode.",
                             color = Theme.colorScheme.secondaryText
                         )
                     }
                 }
             }
 
-            // 8. 가이드 및 모달 계열 (STooltip, SDialog, SBottomSheet)
+            // 8. Guides and modals (STooltip, SDialog, SBottomSheet)
             SHeadingXXLargeText(text = "8. Modals, Overlays & Tooltips")
             SCard(style = CardStyle.PRIMARY) {
                 Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    // STooltip 제어
+                    // STooltip control
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            SLabelLargeText(text = "STooltip (말풍선 도움말 가이드)")
+                            SLabelLargeText(text = "STooltip (speech bubble guide)")
                             SButton(
-                                text = if (tooltipVisible) "숨기기" else "보이기",
+                                text = if (tooltipVisible) "Hide" else "Show",
                                 type = SButtonType.SECONDARY,
                                 onClick = { tooltipVisible = !tooltipVisible },
                                 modifier = Modifier.size(width = 80.dp, height = 32.dp)
@@ -490,7 +490,7 @@ fun DesignSystemShowcase() {
                             contentAlignment = Alignment.Center
                         ) {
                             STooltip(
-                                text = "스캔 버튼을 누르면 빠른 PDF 공유가 가능합니다",
+                                text = "Press the scan button for quick PDF sharing",
                                 direction = TooltipDirection.Top,
                                 visible = tooltipVisible
                             )
@@ -504,12 +504,12 @@ fun DesignSystemShowcase() {
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         SButton(
-                            text = "의사결정 팝업(SDialog)",
+                            text = "Decision Popup (SDialog)",
                             onClick = { showDialog = true },
                             modifier = Modifier.weight(1f)
                         )
                         SButton(
-                            text = "바텀시트(SBottomSheet)",
+                            text = "Bottom Sheet (SBottomSheet)",
                             type = SButtonType.SECONDARY,
                             onClick = { showBottomSheet = true },
                             modifier = Modifier.weight(1f)
@@ -520,27 +520,27 @@ fun DesignSystemShowcase() {
         }
     }
 
-    // 대화형 팝업 실시간 렌더링
+    // Interactive popup live rendering
     if (showDialog) {
         SConfirmDialog(
-            title = "디자인 테마 변경",
-            message = "정말 Soft Monotone 테마 디자인을 마음에 들어 하시나요? 이 시스템은 우버의 철학을 가득 담아 완전히 독자 제작되었습니다.",
-            confirmText = "마음에 듭니다",
-            dismissText = "다시 볼래요",
+            title = "Change Design Theme",
+            message = "Do you really like the Soft Monotone theme design? This system was entirely custom-built with a refined design philosophy.",
+            confirmText = "I love it",
+            dismissText = "Let me reconsider",
             onConfirm = { showDialog = false },
             onDismissRequest = { showDialog = false }
         )
     }
 
-    // 대화형 바텀시트 실시간 렌더링
+    // Interactive bottom sheet live rendering
     if (showBottomSheet) {
         SModalBottomSheet(
             onDismissRequest = { showBottomSheet = false }
         ) {
-            SBottomSheetHeader(title = "내보내기 옵션")
+            SBottomSheetHeader(title = "Export Options")
             Spacer(modifier = Modifier.height(10.dp))
             SBottomSheetItem(
-                text = "PDF 문서로 공유하기",
+                text = "Share as PDF Document",
                 icon = {
                     SIcon(
                         imageVector = Icons.Share,
@@ -552,7 +552,7 @@ fun DesignSystemShowcase() {
                 onClick = { showBottomSheet = false }
             )
             SBottomSheetItem(
-                text = "갤러리에 이미지로 보관하기",
+                text = "Save Image to Gallery",
                 icon = {
                     SIcon(
                         imageVector = Icons.Folder,
@@ -564,7 +564,7 @@ fun DesignSystemShowcase() {
                 onClick = { showBottomSheet = false }
             )
             SBottomSheetItem(
-                text = "영구히 파일 삭제하기",
+                text = "Permanently Delete File",
                 icon = {
                     SIcon(
                         imageVector = Icons.Delete,
@@ -580,7 +580,7 @@ fun DesignSystemShowcase() {
 }
 
 /**
- * 컬러 정보를 직관적으로 표출하는 헬퍼 컴포저블
+ * Helper composable that visually displays color information
  */
 @Composable
 private fun ColorInfoChip(

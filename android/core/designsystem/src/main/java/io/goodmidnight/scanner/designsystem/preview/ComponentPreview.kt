@@ -7,7 +7,7 @@ import io.goodmidnight.scanner.designsystem.theme.Theme
 
 /**
  * [ComponentPreview]
- * - [Composable] 컴포넌트를 보여주기 위한 Day/Night 멀티 테마 애노테이션
+ * - Day/Night multi-theme annotation for previewing [Composable] components
  */
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.FUNCTION)
@@ -17,7 +17,7 @@ annotation class ComponentPreview
 
 /**
  * [DesignSystemShowcaseAnnotationPreview]
- * - 대통합 Showcase를 스튜디오 프리뷰 패널에서 실시간 Day/Night 테마로 렌더링하기 위한 함수입니다.
+ * - Function for rendering the comprehensive Showcase in the Studio preview panel with live Day/Night themes.
  */
 @ComponentPreview
 @Composable
